@@ -8,6 +8,14 @@ No installation. No accounts. No cloud. Everything runs locally in your browser.
 
 ---
 
+## Live demo
+
+**[→ Try the gallery demo here](https://jovialk69.github.io/nomi-archive-toolkit/gallery.html)**
+
+See the gallery in action with sample images and prompts — lightbox, NSFW covers, search, slideshow and all. No sign-in required.
+
+---
+
 ## Why this exists
 
 Nomi.ai doesn't currently provide a way to export your generated images or retrieve the prompts that created them via its API. This toolkit fills that gap — giving you a fast, private, offline-first way to archive your Nomi images and the prompts behind them, so you can recreate them anytime even if you delete a Nomi.
@@ -107,7 +115,7 @@ Hosting on GitHub Pages unlocks `gallery.html` — it auto-loads `prompts.csv` a
 **Step 1 — Create a GitHub repository**
 
 1. Go to [github.com](https://github.com) → click **+** → **New repository**
-2. Name it `nomi-archive` → set to **Public** → click **Create repository**
+2. Name it `nomi-archive-toolkit` → set to **Public** → click **Create repository**
 
 **Step 2 — Generate a Personal Access Token**
 
@@ -115,7 +123,7 @@ GitHub requires a token instead of your password for Git operations.
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **Generate new token** → **Generate new token (classic)**
-3. Name it `nomi-archive-mac`, set expiration to **No expiration**, tick **repo**
+3. Name it `nomi-archive-toolkit-mac`, set expiration to **No expiration**, tick **repo**
 4. Click **Generate token** — copy it immediately (shown only once)
 
 **Step 3 — Push your files**
@@ -125,8 +133,8 @@ Open Terminal and run (replace `YOUR_USERNAME` with your GitHub username):
 ```bash
 git config --global credential.helper osxkeychain
 cd ~/Desktop
-git clone https://github.com/YOUR_USERNAME/nomi-archive.git
-cd nomi-archive
+git clone https://github.com/YOUR_USERNAME/nomi-archive-toolkit.git
+cd nomi-archive-toolkit
 ```
 
 Copy all toolkit files into this folder, then:
@@ -143,15 +151,15 @@ When prompted, enter your GitHub username and paste your token as the password.
 
 1. Go to your repo on GitHub → **Settings** → **Pages**
 2. Under **Source** → select **Deploy from a branch** → **main** → **/ (root)** → **Save**
-3. Wait 30–60 seconds — your gallery is live at `https://YOUR_USERNAME.github.io/nomi-archive/`
+3. Wait 30–60 seconds — your gallery is live at `https://YOUR_USERNAME.github.io/nomi-archive-toolkit/`
 
 ### Updating with new images
 
 ```bash
-# 1. Export fresh prompts.csv from logger.html into your nomi-archive folder
+# 1. Export fresh prompts.csv from logger.html into your nomi-archive-toolkit folder
 # 2. Copy new images into the images/ folder
 # 3. Then run:
-cd ~/Desktop/nomi-archive
+cd ~/Desktop/nomi-archive-toolkit
 git add .
 git commit -m "Add new images"
 git push
@@ -166,7 +174,7 @@ Forks and contributions are welcome. This project is licensed under **GPL v3** �
 ### To fork this project
 
 1. Click **Fork** at the top-right of this GitHub page
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/nomi-archive.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/nomi-archive-toolkit.git`
 3. Make your changes
 4. Submit a **Pull Request** if you'd like your changes merged back
 
