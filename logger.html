@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomi Logger</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0c;
+    --surface: #171715;
+    --surface2: #1f1f1c;
+    --surface3: #272724;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --border3: rgba(255,255,255,0.22);
+    --text: #f0ece4;
+    --text2: #9c9890;
+    --text3: #54524e;
+    --accent: #d4a853;
+    --accent-dim: rgba(212,168,83,0.12);
+    --accent-border: rgba(212,168,83,0.35);
+    --success: #4caf7d;
+    --success-dim: rgba(76,175,125,0.12);
+    --success-border: rgba(76,175,125,0.35);
+    --info: #5b9fd4;
+    --info-dim: rgba(91,159,212,0.12);
+    --info-border: rgba(91,159,212,0.35);
+    --radius: 10px;
+    --radius-sm: 7px;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+  }
+
+  .topbar-title {
+    font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600;
+    letter-spacing: -0.2px; color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .topbar-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .topbar-meta { font-size: 12px; color: var(--text3); }
+  .topbar-meta span { color: var(--text2); font-weight: 500; }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 0.5px solid var(--border);
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 20px;
+    overflow-y: auto;
+    height: calc(100vh - 49px);
+  }
+
+  .sidebar-label {
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text3); margin-bottom: 8px;
+  }
+
+  .nomi-list { display: flex; flex-direction: column; gap: 4px; }
+
+  .nomi-chip-wrap {
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .nomi-chip-wrap .nomi-chip { flex: 1; }
+
+  .nomi-delete-btn {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; line-height: 1;
+    background: transparent; border: 0.5px solid transparent;
+    border-radius: var(--radius-sm); color: var(--text3);
+    cursor: pointer; transition: all 0.15s; opacity: 0;
+  }
+
+  .nomi-chip-wrap:hover .nomi-delete-btn { opacity: 1; }
+  .nomi-delete-btn:hover { color: #e05555; border-color: rgba(220,80,80,0.35); background: rgba(220,80,80,0.08); }
+
+  .nomi-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-radius: var(--radius-sm);
+    border: 0.5px solid transparent; cursor: pointer; transition: all 0.15s;
+    font-size: 13px; color: var(--text2); background: transparent;
+    font-family: 'Instrument Sans', sans-serif; text-align: left; width: 100%;
+  }
+
+  .nomi-chip:hover { background: var(--surface2); color: var(--text); }
+  .nomi-chip.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
+  .nomi-chip .count { font-size: 11px; color: var(--text3); background: var(--surface3); padding: 1px 7px; border-radius: 999px; }
+  .nomi-chip.active .count { background: var(--accent-dim); color: var(--accent); }
+
+  .add-nomi-row { display: flex; gap: 6px; }
+
+  .add-nomi-row input {
+    flex: 1; padding: 7px 10px; font-size: 13px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+
+  .add-nomi-row input:focus { border-color: var(--border3); }
+  .add-nomi-row input::placeholder { color: var(--text3); }
+
+  .icon-btn {
+    padding: 7px 11px; font-size: 16px;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text2);
+    cursor: pointer; transition: all 0.15s; font-family: inherit; line-height: 1;
+  }
+
+  .icon-btn:hover { background: var(--surface3); color: var(--text); }
+
+  .export-block { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+
+  .export-btn {
+    width: 100%; padding: 9px 14px; font-size: 13px; font-weight: 500;
+    font-family: 'Syne', sans-serif;
+    background: var(--accent-dim); border: 0.5px solid var(--accent-border);
+    border-radius: var(--radius-sm); color: var(--accent);
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+
+  .export-btn:hover { background: rgba(212,168,83,0.2); }
+
+  .import-btn-sm {
+    width: 100%; padding: 8px 14px; font-size: 12px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: transparent; border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text2);
+    cursor: pointer; transition: all 0.15s; text-align: center; display: block;
+  }
+
+  .import-btn-sm:hover { background: var(--surface2); color: var(--text); }
+  .entry-count-total { font-size: 11px; color: var(--text3); text-align: center; }
+
+  .main { display: flex; flex-direction: column; height: calc(100vh - 49px); overflow: hidden; }
+
+  .log-form {
+    padding: 18px 24px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .form-row { display: flex; gap: 10px; align-items: flex-start; }
+  .field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+
+  .field label {
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.09em; color: var(--text3);
+  }
+
+  .field input, .field textarea, .field select {
+    padding: 9px 12px; font-size: 13px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); outline: none;
+    transition: border-color 0.15s; resize: none;
+  }
+
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--border3); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--text3); }
+  .field select option { background: var(--surface2); }
+
+  /* Image picker zone */
+  .picker-section-label {
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--text3); margin-bottom: 6px;
+  }
+
+  .image-picker-zone {
+    border: 0.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex; gap: 14px; align-items: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    background: transparent; position: relative;
+  }
+
+  .image-picker-zone:hover { border-color: var(--border3); background: var(--surface2); }
+  .image-picker-zone.has-image { border-style: solid; border-color: var(--accent-border); background: var(--accent-dim); }
+
+  .image-picker-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .image-picker-zone.has-image input[type="file"] { pointer-events: none; }
+
+  .img-preview-box {
+    width: 64px; height: 64px; flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: var(--surface3); border: 0.5px solid var(--border2);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    color: var(--text3);
+  }
+
+  .img-preview-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .img-pick-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+  .img-pick-primary { font-size: 13px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .img-pick-secondary { font-size: 11px; color: var(--text3); }
+
+  .clear-btn {
+    padding: 3px 9px; font-size: 11px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: transparent; border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text3);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    position: relative; z-index: 2;
+  }
+
+  .clear-btn:hover { color: var(--text2); border-color: var(--border3); }
+
+  /* Rename instruction box */
+  .rename-box {
+    background: var(--surface2);
+    border: 0.5px solid var(--info-border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    display: none; flex-direction: column; gap: 7px;
+  }
+
+  .rename-box.visible { display: flex; }
+
+  .rename-box-label {
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.09em; color: var(--info);
+  }
+
+  .rename-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+
+  .rename-from {
+    font-size: 12px; color: var(--text3); font-style: italic;
+    text-decoration: line-through; word-break: break-all; max-width: 200px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .rename-arrow { font-size: 12px; color: var(--text3); flex-shrink: 0; }
+
+  .rename-to {
+    font-size: 13px; font-weight: 500; color: var(--accent);
+    font-family: 'Courier New', monospace; word-break: break-all;
+  }
+
+  .rename-copy-btn {
+    padding: 4px 12px; font-size: 12px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: transparent; border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text2);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .rename-copy-btn:hover { background: var(--surface3); color: var(--text); }
+  .rename-copy-btn.copied { color: var(--success); border-color: var(--success-border); }
+
+  .rename-hint { font-size: 11px; color: var(--text3); line-height: 1.55; }
+  .rename-hint code { font-family: 'Courier New', monospace; background: var(--surface3); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+
+  /* Submit row */
+  .submit-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .submit-status { font-size: 12px; color: var(--text3); font-style: italic; }
+
+  .submit-btn {
+    padding: 10px 26px; font-size: 13px; font-weight: 500;
+    font-family: 'Syne', sans-serif;
+    background: var(--accent); border: none;
+    border-radius: var(--radius-sm); color: #0e0e0c;
+    cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+
+  /* Entry log */
+  .log-header {
+    padding: 12px 24px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 0.5px solid var(--border); flex-shrink: 0;
+  }
+
+  .log-header-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text3); }
+
+  .log-search { position: relative; }
+
+  .log-search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; color: var(--text3); pointer-events: none; }
+
+  .log-search input {
+    padding: 6px 10px 6px 28px; font-size: 12px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); outline: none;
+    width: 200px; transition: border-color 0.15s;
+  }
+
+  .log-search input:focus { border-color: var(--border3); }
+  .log-search input::placeholder { color: var(--text3); }
+
+  .entries-list { flex: 1; overflow-y: auto; padding: 12px 24px; display: flex; flex-direction: column; gap: 8px; }
+
+  .entry-card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: border-color 0.15s; animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .entry-card:hover { border-color: var(--border2); }
+  .entry-card.new-flash { border-color: var(--accent-border); background: var(--accent-dim); }
+
+  .entry-thumb {
+    width: 52px; height: 52px; flex-shrink: 0;
+    border-radius: var(--radius-sm); background: var(--surface2);
+    border: 0.5px solid var(--border); overflow: hidden;
+    display: flex; align-items: center; justify-content: center; color: var(--text3);
+  }
+
+  .entry-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .entry-body { flex: 1; min-width: 0; }
+
+  .entry-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+
+  .entry-nomi { font-size: 11px; font-weight: 500; color: var(--accent); background: var(--accent-dim); padding: 2px 8px; border-radius: 999px; border: 0.5px solid var(--accent-border); }
+  .entry-filename { font-size: 11px; color: var(--text3); font-style: italic; }
+  .entry-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  .entry-prompt { font-size: 13px; color: var(--text2); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .entry-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+
+  .mini-btn { padding: 4px 9px; font-size: 11px; font-family: 'Instrument Sans', sans-serif; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .mini-btn:hover { background: var(--surface2); color: var(--text); }
+  .mini-btn.del:hover { border-color: rgba(220,80,80,0.4); color: #e05555; background: rgba(220,80,80,0.08); }
+  .mini-btn.copied { color: var(--success); border-color: var(--success-border); background: var(--success-dim); }
+  .mini-btn.nsfw-on { color: rgba(220,80,80,0.85); border-color: rgba(220,80,80,0.4); background: rgba(220,80,80,0.08); }
+  .mini-btn.nsfw-on:hover { background: rgba(220,80,80,0.15); }
+
+  .empty-log { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); font-size: 13px; gap: 6px; padding: 2rem; text-align: center; }
+  .empty-log svg { width: 32px; height: 32px; margin-bottom: 4px; }
+
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface3); border: 0.5px solid var(--border2); color: var(--text); font-size: 13px; padding: 10px 18px; border-radius: 999px; opacity: 0; transform: translateY(8px); transition: all 0.25s ease; pointer-events: none; z-index: 999; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast.success { border-color: var(--success-border); color: var(--success); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+
+  /* ── NSFW toggle ── */
+  .nsfw-toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    user-select: none;
+  }
+
+  .nsfw-toggle-row:hover { border-color: var(--border3); }
+  .nsfw-toggle-row.active { border-color: rgba(220,80,80,0.45); background: rgba(220,80,80,0.07); }
+
+  .nsfw-toggle-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text2);
+  }
+
+  .nsfw-toggle-row.active .nsfw-toggle-label { color: #e07070; }
+
+  .nsfw-toggle-label svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .nsfw-pill {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 2px 8px;
+    border-radius: 999px; border: 0.5px solid rgba(220,80,80,0.4);
+    color: rgba(220,80,80,0.8); background: rgba(220,80,80,0.08);
+    display: none;
+  }
+
+  .nsfw-toggle-row.active .nsfw-pill { display: inline-block; }
+
+  .nsfw-switch {
+    width: 32px; height: 18px; border-radius: 999px;
+    background: var(--surface3); border: 0.5px solid var(--border2);
+    position: relative; flex-shrink: 0; transition: background 0.2s, border-color 0.2s;
+  }
+
+  .nsfw-toggle-row.active .nsfw-switch {
+    background: rgba(220,80,80,0.7); border-color: rgba(220,80,80,0.5);
+  }
+
+  .nsfw-switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--text3); transition: transform 0.2s, background 0.2s;
+  }
+
+  .nsfw-toggle-row.active .nsfw-switch::after {
+    transform: translateX(14px); background: #fff;
+  }
+
+  /* NSFW badge on entry cards */
+  .entry-nsfw-badge {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 7px;
+    border-radius: 999px; border: 0.5px solid rgba(220,80,80,0.4);
+    color: rgba(220,80,80,0.85); background: rgba(220,80,80,0.08);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title"><div class="dot"></div>Nomi Logger</div>
+  <div class="topbar-meta">Open alongside Nomi.ai · <span id="totalCount">0</span> entries logged</div>
+</div>
+
+<div class="sidebar">
+  <div>
+    <div class="sidebar-label">Your Nomis</div>
+    <div class="nomi-list" id="nomiList"></div>
+  </div>
+  <div>
+    <div class="sidebar-label">Add Nomi</div>
+    <div class="add-nomi-row">
+      <input type="text" id="newNomiInput" placeholder="Nomi name…" maxlength="40">
+      <button class="icon-btn" onclick="addNomi()">+</button>
+    </div>
+  </div>
+  <div class="export-block">
+    <div class="sidebar-label">Export / Import</div>
+    <button class="export-btn" onclick="exportCSV()">↓ Export prompts.csv</button>
+    <label class="import-btn-sm">↑ Import existing CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
+    <div class="entry-count-total" id="entryCountTotal"></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="log-form">
+
+    <div class="form-row">
+      <div class="field" style="max-width:180px;">
+        <label>Nomi</label>
+        <select id="nomiSelect" onchange="onFormChange()">
+          <option value="">— select —</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:130px;">
+        <label>Image # (optional)</label>
+        <input type="number" id="imgNumber" placeholder="auto" min="1" oninput="onFormChange()">
+      </div>
+    </div>
+
+    <div>
+      <div class="picker-section-label">Image from your images/ folder</div>
+      <div class="image-picker-zone" id="pickerZone">
+        <input type="file" id="imgFile" accept="image/*" onchange="handleImagePick(event)">
+        <div class="img-preview-box" id="imgPreviewBox">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="img-pick-info">
+          <div class="img-pick-primary" id="imgPickPrimary">Click to select an image</div>
+          <div class="img-pick-secondary" id="imgPickSecondary">JPG · PNG · WEBP supported</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rename-box" id="renameBox">
+      <div class="rename-box-label">Rename this file in Finder</div>
+      <div class="rename-row">
+        <span class="rename-from" id="renameFrom"></span>
+        <span class="rename-arrow">→</span>
+        <span class="rename-to" id="renameTo"></span>
+        <button class="rename-copy-btn" id="renameCopyBtn" onclick="copyNewFilename()">Copy name</button>
+      </div>
+      <div class="rename-hint">
+        In Finder: select the file → press <code>Return</code> → paste → press <code>Return</code> again. Then click Log entry below.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Image prompt</label>
+      <textarea id="promptInput" rows="3" placeholder="Paste the image prompt from Nomi.ai here…"></textarea>
+    </div>
+
+    <div onclick="toggleNsfw()" id="nsfwToggleRow" class="nsfw-toggle-row">
+      <div class="nsfw-toggle-label">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/>
+          <circle cx="8" cy="8" r="2"/>
+          <line x1="2" y1="2" x2="14" y2="14" class="nsfw-cross" style="display:none"/>
+        </svg>
+        Mark as NSFW
+        <span class="nsfw-pill">NSFW</span>
+      </div>
+      <div class="nsfw-switch"></div>
+    </div>
+
+    <div class="submit-row">
+      <div class="submit-status" id="submitStatus"></div>
+      <button class="submit-btn" onclick="logEntry()">Log entry →</button>
+    </div>
+
+  </div>
+
+  <div class="log-header">
+    <div class="log-header-title" id="logHeaderTitle">All entries</div>
+    <div class="log-search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+      <input type="text" id="searchInput" placeholder="Search prompts…" oninput="renderEntries()">
+    </div>
+  </div>
+
+  <div class="entries-list" id="entriesList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let nomis = [], entries = [], activeNomi = null;
+  let imageDataMap = {};
+  let currentOriginalName = null, currentImageData = null, currentGeneratedFilename = null;
+
+  function save() {
+    try {
+      localStorage.setItem('nomi_logger_nomis', JSON.stringify(nomis));
+      localStorage.setItem('nomi_logger_entries', JSON.stringify(entries.map(e => ({...e, thumb: null}))));
+    } catch(e) {}
+  }
+
+  function load() {
+    try {
+      const n = localStorage.getItem('nomi_logger_nomis');
+      const en = localStorage.getItem('nomi_logger_entries');
+      if (n) nomis = JSON.parse(n);
+      if (en) entries = JSON.parse(en);
+    } catch(e) {}
+  }
+
+  function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show' + (type ? ' '+type : '');
+    clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function slugify(n) { return n.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''); }
+
+  function getExt(fname) { const p = fname.split('.'); return p.length > 1 ? p[p.length-1].toLowerCase() : 'png'; }
+
+  function getNextNumber(nomiName) {
+    const existing = entries.filter(e => e.nomi === nomiName);
+    if (!existing.length) return 1;
+    const nums = existing.map(e => { const m = e.filename.match(/_(\d+)\./); return m ? parseInt(m[1]) : 0; });
+    return Math.max(...nums) + 1;
+  }
+
+  function buildFilename(nomiName, num, ext) {
+    return `${slugify(nomiName)}_${String(num).padStart(3,'0')}.${ext}`;
+  }
+
+  function onFormChange() { updateRenameBox(); updateSubmitStatus(); }
+
+  function handleImagePick(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    currentOriginalName = file.name;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      currentImageData = ev.target.result;
+      document.getElementById('imgPreviewBox').innerHTML = `<img src="${currentImageData}" alt="">`;
+      document.getElementById('pickerZone').classList.add('has-image');
+      document.getElementById('imgPickPrimary').textContent = file.name;
+      document.getElementById('imgPickSecondary').innerHTML =
+        `<button class="clear-btn" onclick="clearImage(event)">✕ Clear image</button>`;
+      onFormChange();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage(e) {
+    if (e) e.stopPropagation();
+    currentOriginalName = null; currentImageData = null; currentGeneratedFilename = null;
+    document.getElementById('imgPreviewBox').innerHTML =
+      `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+    document.getElementById('pickerZone').classList.remove('has-image');
+    document.getElementById('imgPickPrimary').textContent = 'Click to select an image';
+    document.getElementById('imgPickSecondary').textContent = 'JPG · PNG · WEBP supported';
+    document.getElementById('imgFile').value = '';
+    document.getElementById('renameBox').classList.remove('visible');
+    updateSubmitStatus();
+  }
+
+  function updateRenameBox() {
+    const nomi = document.getElementById('nomiSelect').value;
+    const numInput = document.getElementById('imgNumber').value;
+    const box = document.getElementById('renameBox');
+    if (!nomi || !currentOriginalName) { box.classList.remove('visible'); currentGeneratedFilename = null; return; }
+    const num = numInput ? parseInt(numInput) : getNextNumber(nomi);
+    const ext = getExt(currentOriginalName);
+    const generated = buildFilename(nomi, num, ext);
+    currentGeneratedFilename = generated;
+    document.getElementById('renameFrom').textContent = currentOriginalName;
+    document.getElementById('renameTo').textContent = generated;
+    if (currentOriginalName === generated) {
+      box.classList.remove('visible');
+    } else {
+      box.classList.add('visible');
+    }
+    const btn = document.getElementById('renameCopyBtn');
+    btn.textContent = 'Copy name'; btn.classList.remove('copied');
+  }
+
+  function copyNewFilename() {
+    if (!currentGeneratedFilename) return;
+    navigator.clipboard.writeText(currentGeneratedFilename).then(() => {
+      const btn = document.getElementById('renameCopyBtn');
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy name'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function updateSubmitStatus() {
+    const nomi = document.getElementById('nomiSelect').value;
+    const status = document.getElementById('submitStatus');
+    if (!nomi) { status.textContent = ''; return; }
+    const num = document.getElementById('imgNumber').value ? parseInt(document.getElementById('imgNumber').value) : getNextNumber(nomi);
+    const ext = currentOriginalName ? getExt(currentOriginalName) : 'png';
+    status.textContent = `Will log as: ${buildFilename(nomi, num, ext)}`;
+  }
+
+  let nsfwFlag = false;
+
+  function toggleNsfw() {
+    nsfwFlag = !nsfwFlag;
+    const row = document.getElementById('nsfwToggleRow');
+    row.classList.toggle('active', nsfwFlag);
+  }
+
+  function logEntry() {
+    const nomi = document.getElementById('nomiSelect').value;
+    const prompt = document.getElementById('promptInput').value.trim();
+    const numInput = document.getElementById('imgNumber').value;
+    if (!nomi) { showToast('Please select a Nomi'); return; }
+    if (!prompt) { showToast('Please enter a prompt'); return; }
+    const num = numInput ? parseInt(numInput) : getNextNumber(nomi);
+    const ext = currentOriginalName ? getExt(currentOriginalName) : 'png';
+    const filename = buildFilename(nomi, num, ext);
+    const entry = { id: Date.now(), nomi, filename, prompt, nsfw: nsfwFlag, date: new Date().toISOString(), thumb: null };
+    entries.unshift(entry);
+    if (currentImageData) imageDataMap[entry.id] = currentImageData;
+    document.getElementById('promptInput').value = '';
+    document.getElementById('imgNumber').value = '';
+    // Reset NSFW toggle
+    nsfwFlag = false;
+    document.getElementById('nsfwToggleRow').classList.remove('active');
+    clearImage(null);
+    save(); renderEntries(); updateTotalCount(); renderSidebar(); updateSubmitStatus();
+    showToast(`Logged → ${filename}`, 'success');
+    setTimeout(() => {
+      const first = document.querySelector('.entry-card');
+      if (first) { first.classList.add('new-flash'); setTimeout(() => first.classList.remove('new-flash'), 1200); }
+    }, 50);
+  }
+
+  function addNomi() {
+    const input = document.getElementById('newNomiInput');
+    const name = input.value.trim();
+    if (!name) return;
+    if (nomis.find(n => n.toLowerCase() === name.toLowerCase())) { showToast('Nomi already exists'); return; }
+    nomis.push(name); input.value = '';
+    save(); renderSidebar(); updateNomiSelect();
+    showToast(`Added "${name}"`, 'success');
+  }
+
+  document.getElementById('newNomiInput').addEventListener('keydown', e => { if (e.key === 'Enter') addNomi(); });
+
+  function setActiveNomi(name) { activeNomi = name; renderSidebar(); renderEntries(); }
+
+  function renderSidebar() {
+    let html = `<button class="nomi-chip ${activeNomi===null?'active':''}" onclick="setActiveNomi(null)">All Nomis <span class="count">${entries.length}</span></button>`;
+    for (const n of nomis) {
+      const count = entries.filter(e => e.nomi === n).length;
+      html += `<div class="nomi-chip-wrap">
+        <button class="nomi-chip ${activeNomi===n?'active':''}" onclick="setActiveNomi('${n.replace(/'/g,"\\'")}')">
+          ${n} <span class="count">${count}</span>
+        </button>
+        <button class="nomi-delete-btn" onclick="deleteNomi('${n.replace(/'/g,"\\'")}', event)" title="Delete ${n}">✕</button>
+      </div>`;
+    }
+    document.getElementById('nomiList').innerHTML = html;
+    updateNomiSelect();
+  }
+
+  function updateNomiSelect() {
+    const sel = document.getElementById('nomiSelect');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— select Nomi —</option>' +
+      nomis.map(n => `<option value="${n}"${n===prev?' selected':''}>${n}</option>`).join('');
+  }
+
+  function updateTotalCount() {
+    document.getElementById('totalCount').textContent = entries.length;
+    document.getElementById('entryCountTotal').textContent =
+      `${entries.length} entr${entries.length!==1?'ies':'y'} · ${nomis.length} Nomi${nomis.length!==1?'s':''}`;
+  }
+
+  function deleteEntry(id) {
+    entries = entries.filter(e => e.id !== id); delete imageDataMap[id];
+    save(); renderEntries(); updateTotalCount(); renderSidebar();
+  }
+
+  function toggleEntryNsfw(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    entry.nsfw = !entry.nsfw;
+    save(); renderEntries();
+    showToast(entry.nsfw ? 'Marked as NSFW' : 'NSFW removed', 'success');
+  }
+
+  function copyPrompt(id, btn) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    navigator.clipboard.writeText(entry.prompt).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function renderEntries() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = entries.filter(e =>
+      (activeNomi===null || e.nomi===activeNomi) &&
+      (!q || e.prompt.toLowerCase().includes(q) || e.filename.toLowerCase().includes(q) || e.nomi.toLowerCase().includes(q))
+    );
+    const total = entries.filter(e => activeNomi===null || e.nomi===activeNomi).length;
+    document.getElementById('logHeaderTitle').textContent = q
+      ? `"${q}" · ${filtered.length} result${filtered.length!==1?'s':''}`
+      : `${activeNomi?activeNomi+' · ':'All entries · '}${total}`;
+    const list = document.getElementById('entriesList');
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+        ${entries.length===0?'No entries yet — add your Nomis and start logging!':'No entries match your search.'}
+      </div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(e => {
+      const thumb = imageDataMap[e.id] || e.thumb;
+      const dateStr = new Date(e.date).toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
+      return `<div class="entry-card" id="entry-${e.id}">
+        <div class="entry-thumb">${thumb?`<img src="${thumb}" alt="">`:
+          `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}</div>
+        <div class="entry-body">
+          <div class="entry-meta">
+            <span class="entry-nomi">${e.nomi}</span>
+            <span class="entry-filename">${e.filename}</span>
+            ${e.nsfw ? '<span class="entry-nsfw-badge">NSFW</span>' : ''}
+            <span class="entry-date">${dateStr}</span>
+          </div>
+          <div class="entry-prompt">${e.prompt}</div>
+        </div>
+        <div class="entry-actions">
+          <button class="mini-btn" onclick="copyPrompt(${e.id},this)">Copy</button>
+          <button class="mini-btn ${e.nsfw ? 'nsfw-on' : ''}" onclick="toggleEntryNsfw(${e.id})" title="${e.nsfw ? 'Remove NSFW flag' : 'Mark as NSFW'}">${e.nsfw ? 'NSFW ✓' : 'NSFW'}</button>
+          <button class="mini-btn del" onclick="deleteEntry(${e.id})">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function exportCSV() {
+    if (!entries.length) { showToast('Nothing to export yet'); return; }
+    const rows = ['filename,nomi_name,prompt,nsfw'];
+    [...entries].reverse().forEach(e => {
+      const p = e.prompt.includes(',') ? `"${e.prompt.replace(/"/g,'""')}"` : e.prompt;
+      rows.push(`${e.filename},${e.nomi},${p},${e.nsfw ? 'true' : 'false'}`);
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+    a.download = 'prompts.csv'; a.click();
+    showToast(`Exported ${entries.length} entries`, 'success');
+  }
+
+  function importCSV(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const lines = e.target.result.trim().split(/\r?\n/); let added = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim(); if (!line) continue;
+        const f = line.indexOf(','), s = line.indexOf(',', f+1);
+        if (f===-1||s===-1) continue;
+        const filename = line.slice(0,f).trim();
+        const nomi = line.slice(f+1,s).trim();
+        let rest = line.slice(s+1).trim();
+        let prompt = rest, nsfw = false;
+
+        // Normalise triple quotes (export artefact) to single quote
+        while (rest.startsWith('""')) rest = rest.slice(1);
+
+        if (rest.startsWith('"')) {
+          const cq = rest.indexOf('"', 1);
+          if (cq !== -1) {
+            prompt = rest.slice(1, cq);
+            const after = rest.slice(cq+1).trim();
+            if (after.startsWith(',')) nsfw = after.slice(1).trim().toLowerCase() === 'true';
+          } else {
+            prompt = rest.slice(1); // unclosed quote — take the rest
+          }
+        } else {
+          const lc = rest.lastIndexOf(',');
+          if (lc !== -1) {
+            const maybeNsfw = rest.slice(lc+1).trim().toLowerCase();
+            if (maybeNsfw === 'true' || maybeNsfw === 'false') {
+              prompt = rest.slice(0, lc).trim();
+              nsfw = maybeNsfw === 'true';
+            }
+          }
+        }
+
+        if (!nomis.includes(nomi)) nomis.push(nomi);
+        if (entries.find(e => e.filename===filename)) continue;
+        entries.push({id:Date.now()+i,nomi,filename,prompt,nsfw,date:new Date().toISOString(),thumb:null});
+        added++;
+      }
+      save(); renderSidebar(); renderEntries(); updateTotalCount();
+      showToast(`Imported ${added} new entr${added!==1?'ies':'y'}`, 'success');
+    };
+    reader.readAsText(file); event.target.value='';
+  }
+
+  function deleteNomi(name, e) {
+    e.stopPropagation();
+    const count = entries.filter(en => en.nomi === name).length;
+    const msg = count > 0
+      ? `Delete "${name}"? This will also remove their ${count} entr${count!==1?'ies':'y'} from the log.`
+      : `Delete "${name}"?`;
+    if (!confirm(msg)) return;
+    nomis = nomis.filter(n => n !== name);
+    entries = entries.filter(en => en.nomi !== name);
+    if (activeNomi === name) activeNomi = null;
+    save(); renderSidebar(); renderEntries(); updateTotalCount();
+    showToast(`Deleted "${name}"`, 'success');
+  }
+
+  load(); renderSidebar(); renderEntries(); updateTotalCount();
+</script>
+</body>
+</html>
