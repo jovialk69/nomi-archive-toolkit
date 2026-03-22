@@ -327,6 +327,33 @@
   .copy-btn.copied { color: var(--success); border-color: var(--success); }
   .copy-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 
+  /* ── Style filter row ── */
+  .style-filter {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .style-tab {
+    padding: 5px 14px; font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    border: 0.5px solid var(--border2); border-radius: 999px;
+    background: var(--surface); color: var(--text2);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+
+  .style-tab:hover { background: var(--surface2); color: var(--text); }
+  .style-tab.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+  /* ── Style badge on cards ── */
+  .style-badge {
+    position: absolute; bottom: 9px; right: 9px;
+    background: rgba(0,0,0,0.52); color: #fff;
+    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    border-radius: 999px; backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px); letter-spacing: 0.04em;
+    pointer-events: none; z-index: 1;
+  }
+
   /* ── Empty state ── */
   .empty-state {
     grid-column: 1 / -1; text-align: center;
@@ -489,6 +516,7 @@
   </div>
   <div class="tabs" id="tabs"></div>
 </div>
+<div class="style-filter" id="styleFilter" style="display:none;"></div>
 
 <!-- Toolbar -->
 <div class="toolbar" id="toolbar" style="display:none;">
@@ -537,6 +565,8 @@
   let allEntries = [];
   let imageMap = {};
   let activeNomi = 'All';
+  let activeStyle = 'All';
+  let hasStyles = false;
   let lbIndex = 0;
   let lbFiltered = [];
   let slideshowTimer = null;
@@ -563,7 +593,9 @@
       // Restore saved filter & search
       const savedNomi = localStorage.getItem('nomi_gallery_nomi') || 'All';
       const savedSearch = localStorage.getItem('nomi_gallery_search') || '';
+      const savedStyle = localStorage.getItem('nomi_gallery_style') || 'All';
       activeNomi = allEntries.find(e => e.nomi === savedNomi) ? savedNomi : 'All';
+      activeStyle = savedStyle;
       document.getElementById('searchInput').value = savedSearch;
 
       // Show controls
@@ -588,6 +620,7 @@
         `${allEntries.length} images · ${nomisCount} Nomis`;
 
       buildTabs();
+      buildStyleFilter();
       render();
       showToast(`Loaded ${allEntries.length} images`);
     };
@@ -598,6 +631,8 @@
     allEntries = [];
     imageMap = {};
     activeNomi = 'All';
+    activeStyle = 'All';
+    hasStyles = false;
 
     const panel = document.getElementById('importPanel');
     panel.classList.remove('loaded');
@@ -607,6 +642,7 @@
     document.getElementById('importStatus').classList.remove('visible');
     document.getElementById('controls').style.display = 'none';
     document.getElementById('toolbar').style.display = 'none';
+    document.getElementById('styleFilter').style.display = 'none';
     document.getElementById('gallery').innerHTML = '';
     document.getElementById('tabs').innerHTML = '';
     document.getElementById('headerRight').textContent = '';
@@ -627,7 +663,7 @@
       const filename = line.slice(0, first).trim();
       const nomi = line.slice(first + 1, second).trim();
       let rest = line.slice(second + 1).trim();
-      let prompt = rest, nsfw = false;
+      let prompt = rest, nsfw = false, style = '';
 
       // Normalise triple quotes (export artefact)
       while (rest.startsWith('""')) rest = rest.slice(1);
@@ -637,22 +673,31 @@
         if (closeQuote !== -1) {
           prompt = rest.slice(1, closeQuote);
           const after = rest.slice(closeQuote + 1).trim();
-          if (after.startsWith(',')) nsfw = after.slice(1).trim().toLowerCase() === 'true';
+          if (after.startsWith(',')) {
+            const afterFields = after.slice(1).split(',');
+            nsfw = afterFields[0].trim().toLowerCase() === 'true';
+            style = afterFields[1] ? afterFields[1].trim() : '';
+          }
         } else {
           prompt = rest.slice(1);
         }
       } else {
-        const lastComma = rest.lastIndexOf(',');
-        if (lastComma !== -1) {
-          const maybeNsfw = rest.slice(lastComma + 1).trim().toLowerCase();
-          if (maybeNsfw === 'true' || maybeNsfw === 'false') {
-            prompt = rest.slice(0, lastComma).trim();
-            nsfw = maybeNsfw === 'true';
-          }
+        const parts = rest.split(',');
+        const last = parts[parts.length - 1].trim();
+        const secondLast = parts[parts.length - 2] ? parts[parts.length - 2].trim().toLowerCase() : '';
+        const lastLower = last.toLowerCase();
+        if (lastLower === 'realistic' || lastLower === 'anime' || lastLower === 'mix') {
+          style = last;
+          nsfw = secondLast === 'true';
+          prompt = parts.slice(0, parts.length - 2).join(',').trim();
+        } else if (lastLower === 'true' || lastLower === 'false') {
+          nsfw = lastLower === 'true';
+          prompt = parts.slice(0, parts.length - 1).join(',').trim();
         }
       }
-      entries.push({ filename, nomi, prompt, nsfw });
+      entries.push({ filename, nomi, prompt, nsfw, style });
     }
+    hasStyles = entries.some(e => e.style);
     return entries;
   }
 
@@ -669,11 +714,30 @@
   function setNomi(n) { activeNomi = n; buildTabs(); render(); saveState(); }
   function onSearch() { render(); saveState(); }
 
+  function buildStyleFilter() {
+    const el = document.getElementById('styleFilter');
+    if (!hasStyles) { el.style.display = 'none'; return; }
+    const styles = ['All', ...new Set(allEntries.map(e => e.style).filter(Boolean))];
+    el.style.display = 'flex';
+    el.innerHTML = `<span style="font-size:12px;color:var(--text3);align-self:center;margin-right:2px;">Style:</span>` +
+      styles.map(s =>
+        `<button class="style-tab ${s === activeStyle ? 'active' : ''}" onclick="setStyle('${s}')">${s}</button>`
+      ).join('');
+  }
+
+  function setStyle(s) {
+    activeStyle = s;
+    buildStyleFilter();
+    render();
+    saveState();
+  }
+
   // ── State persistence (filter + search only) ──────────
   function saveState() {
     const q = document.getElementById('searchInput').value.trim();
     localStorage.setItem('nomi_gallery_nomi', activeNomi);
     localStorage.setItem('nomi_gallery_search', q);
+    localStorage.setItem('nomi_gallery_style', activeStyle);
   }
 
   // ── Render ────────────────────────────────────────────
@@ -681,6 +745,7 @@
     const q = document.getElementById('searchInput').value.toLowerCase().trim();
     return allEntries.filter(e =>
       (activeNomi === 'All' || e.nomi === activeNomi) &&
+      (activeStyle === 'All' || e.style === activeStyle) &&
       (!q || e.prompt.toLowerCase().includes(q) || e.nomi.toLowerCase().includes(q) || e.filename.toLowerCase().includes(q))
     );
   }
@@ -723,6 +788,7 @@
         <div class="img-area" onclick="onImgAreaClick(${i}, event)">
           ${imgTag}
           <span class="nomi-badge">${e.nomi}</span>
+          ${e.style ? `<span class="style-badge">${e.style}</span>` : ''}
           ${nsfwCover}
         </div>
         <div class="card-body">
@@ -782,7 +848,7 @@
     if (!e) return;
     const src = imageMap[e.filename];
     document.getElementById('lbImg').src = src || '';
-    document.getElementById('lbNomi').textContent = e.nomi;
+    document.getElementById('lbNomi').textContent = e.style ? `${e.nomi} · ${e.style}` : e.nomi;
     document.getElementById('lbPrompt').textContent = e.prompt;
     document.getElementById('lbFilename').textContent = e.filename;
     document.getElementById('lbCounter').textContent = `${lbIndex + 1} / ${lbFiltered.length}`;

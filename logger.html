@@ -516,7 +516,12 @@
   <div class="export-block">
     <div class="sidebar-label">Export / Import</div>
     <button class="export-btn" onclick="exportCSV()">↓ Export prompts.csv</button>
-    <label class="import-btn-sm">↑ Import existing CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></label>
+    <label class="import-btn-sm">↑ Import CSV + images
+      <input type="file" accept=".csv" style="display:none" onchange="importCSV(event)">
+    </label>
+    <label class="import-btn-sm" style="color:var(--text3);">↑ Load images only
+      <input type="file" accept="image/*" multiple style="display:none" onchange="loadImagesOnly(event)">
+    </label>
     <div class="entry-count-total" id="entryCountTotal"></div>
   </div>
 </div>
@@ -924,9 +929,21 @@
 
   function importCSV(event) {
     const file = event.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const lines = e.target.result.trim().split(/\r?\n/); let added = 0;
+
+    // Also prompt for images via a hidden input
+    const imgPicker = document.createElement('input');
+    imgPicker.type = 'file'; imgPicker.accept = 'image/*'; imgPicker.multiple = true;
+    imgPicker.style.display = 'none';
+    document.body.appendChild(imgPicker);
+
+    // Process the CSV text, then optionally match images
+    const processCSV = (text, imgFiles) => {
+      // Build a filename → objectURL map from selected images
+      if (imgFiles) {
+        for (const f of imgFiles) imageDataMap[f.name] = URL.createObjectURL(f);
+      }
+
+      const lines = text.trim().split(/\r?\n/); let added = 0;
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim(); if (!line) continue;
         const f = line.indexOf(','), s = line.indexOf(',', f+1);
@@ -950,16 +967,13 @@
               style = afterFields[1] ? afterFields[1].trim() : '';
             }
           } else {
-            prompt = rest.slice(1); // unclosed quote — take the rest
+            prompt = rest.slice(1);
           }
         } else {
-          // Find nsfw field — it's the second-to-last or last comma-separated value
           const parts = rest.split(',');
           const nsfwCandidate = parts[parts.length - 1].trim().toLowerCase();
-          const styleCandidate = parts[parts.length - 1].trim();
           const nsfwPrev = parts[parts.length - 2] ? parts[parts.length - 2].trim().toLowerCase() : '';
           if (nsfwCandidate === 'realistic' || nsfwCandidate === 'anime' || nsfwCandidate === 'mix' || nsfwCandidate === '') {
-            // Last field is style, second-to-last is nsfw
             style = parts[parts.length - 1].trim();
             nsfw = nsfwPrev === 'true';
             prompt = parts.slice(0, parts.length - 2).join(',').trim();
@@ -971,13 +985,54 @@
 
         if (!nomis.includes(nomi)) nomis.push(nomi);
         if (entries.find(e => e.filename===filename)) continue;
-        entries.push({id:Date.now()+i,nomi,filename,prompt,style,nsfw,date:new Date().toISOString(),thumb:null});
+        const id = Date.now() + i;
+        entries.push({id, nomi, filename, prompt, style, nsfw, date: new Date().toISOString(), thumb: null});
         added++;
       }
+
+      // Match loaded images to existing entries by filename
+      matchImagesToEntries();
       save(); renderSidebar(); renderEntries(); updateTotalCount();
-      showToast(`Imported ${added} new entr${added!==1?'ies':'y'}`, 'success');
+      const imgCount = imgFiles ? imgFiles.length : 0;
+      showToast(`Imported ${added} entr${added!==1?'ies':'y'}${imgCount ? ` · ${imgCount} image${imgCount!==1?'s':''} loaded` : ''}`, 'success');
+      document.body.removeChild(imgPicker);
     };
-    reader.readAsText(file); event.target.value='';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const csvText = e.target.result;
+      imgPicker.onchange = ev => {
+        processCSV(csvText, ev.target.files.length ? ev.target.files : null);
+        imgPicker.value = '';
+      };
+      // Allow user to skip image selection by waiting 300ms — if they cancel the picker, proceed without images
+      imgPicker.oncancel = () => { processCSV(csvText, null); document.body.removeChild(imgPicker); };
+      imgPicker.click();
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function loadImagesOnly(event) {
+    const files = event.target.files;
+    if (!files.length) return;
+    for (const f of files) imageDataMap[f.name] = URL.createObjectURL(f);
+    matchImagesToEntries();
+    renderEntries();
+    showToast(`Loaded ${files.length} image${files.length!==1?'s':''}`, 'success');
+    event.target.value = '';
+  }
+
+  function matchImagesToEntries() {
+    // For entries whose filename exists in imageDataMap (keyed by filename),
+    // wire up the objectURL so thumbnails show in the current session.
+    // imageDataMap is already keyed by entry.id for newly logged images,
+    // so we add filename-keyed entries for imported ones.
+    for (const entry of entries) {
+      if (!imageDataMap[entry.id] && imageDataMap[entry.filename]) {
+        imageDataMap[entry.id] = imageDataMap[entry.filename];
+      }
+    }
   }
 
   function deleteNomi(name, e) {
