@@ -102,6 +102,7 @@ For each image in your `images/` folder:
 ## Gallery features
 
 - **Filter by Nomi** — pill tabs with image counts
+- **Filter by style** — Realistic / Anime / Mix filter row, only shown when style data exists in the CSV
 - **Search prompts** — full-text search across all prompts
 - **Lightbox** — click any image for full-size view
 - **Slideshow** — auto-advances every 5 seconds with progress bar
@@ -275,7 +276,7 @@ As of early 2026, the Nomi.ai API does not expose an endpoint for retrieving gen
 
 See [CHANGELOG.md](CHANGELOG.md) for full release notes.
 
-Current version: **v1.2.0**
+Current version: **v1.3.0**
 
 ---
 

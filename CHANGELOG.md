@@ -9,6 +9,19 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [v1.3.0] — 2026-03-22
+
+### New features
+- `gallery.html` and `gallery-local.html` — **style filter**
+  - Filter row with `Realistic`, `Anime`, and `Mix` tabs appears below the Nomi tabs — only shown when at least one entry in the CSV has a style value; hidden entirely for old CSVs with no style data
+  - Style filter stacks with the Nomi filter and search, so all three can be combined simultaneously
+  - Active style persisted in `localStorage` between sessions; also reflected in URL params in `gallery.html` (e.g. `?style=Anime`) so filtered views can be bookmarked or shared
+  - Style badge displayed on each card thumbnail (bottom-right corner) when a style is set
+  - Style shown alongside Nomi name in the lightbox (e.g. `Aurora · Anime`)
+  - CSV parser updated in both gallery files to read the `style` column; fully backwards compatible with old 4-column CSVs
+
+---
+
 ## [v1.2.0] — 2026-03-22
 
 ### New features
