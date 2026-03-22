@@ -22,6 +22,7 @@
     --accent: #2a2a28;
     --accent-fg: #ffffff;
     --success: #1a7a4a;
+    --fav: #e05555;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -55,40 +56,28 @@
 
   /* ── Header ── */
   header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    padding-bottom: 1.25rem;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 2rem; padding-bottom: 1.25rem;
     border-bottom: 0.5px solid var(--border);
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-wrap: wrap; gap: 1rem;
   }
 
   header h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    font-weight: 400;
-    letter-spacing: -0.5px;
-    line-height: 1;
+    font-size: 32px; font-weight: 400;
+    letter-spacing: -0.5px; line-height: 1;
   }
 
   header h1 span {
-    display: block;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text3);
-    margin-top: 4px;
+    display: block; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 400;
+    color: var(--text3); margin-top: 4px;
   }
 
   /* ── Loading state ── */
   .loading-state {
-    text-align: center;
-    padding: 4rem 1rem;
-    color: var(--text3);
-    font-size: 14px;
-    display: none;
+    text-align: center; padding: 4rem 1rem;
+    color: var(--text3); font-size: 14px; display: none;
   }
 
   .loading-state.visible { display: block; }
@@ -106,18 +95,11 @@
 
   /* ── Controls ── */
   .controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex; gap: 10px;
+    margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
   }
 
-  .search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
 
   .search-wrap svg {
     position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
@@ -148,6 +130,20 @@
   .tab:hover { background: var(--surface2); color: var(--text); }
   .tab.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 
+  /* ── Style filter ── */
+  .style-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+
+  .style-tab {
+    padding: 5px 14px; font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    border: 0.5px solid var(--border2); border-radius: 999px;
+    background: var(--surface); color: var(--text2);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+
+  .style-tab:hover { background: var(--surface2); color: var(--text); }
+  .style-tab.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
   /* ── Toolbar ── */
   .toolbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -155,8 +151,7 @@
   }
 
   .stats-bar { font-size: 12px; color: var(--text3); }
-
-  .toolbar-actions { display: flex; gap: 8px; }
+  .toolbar-actions { display: flex; gap: 8px; align-items: center; }
 
   .toolbar-btn {
     display: flex; align-items: center; gap: 5px;
@@ -169,6 +164,19 @@
 
   .toolbar-btn:hover { background: var(--surface2); color: var(--text); }
   .toolbar-btn svg { width: 13px; height: 13px; }
+  .toolbar-btn.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+  /* Sort dropdown */
+  .sort-select {
+    padding: 6px 10px; font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text2);
+    cursor: pointer; outline: none; transition: all 0.15s;
+  }
+
+  .sort-select:hover { background: var(--surface2); color: var(--text); }
+  .sort-select option { background: var(--surface); }
 
   /* ── Gallery grid ── */
   .gallery {
@@ -184,14 +192,19 @@
     .tab { padding: 6px 12px; font-size: 12px; }
   }
 
-  @media (max-width: 380px) {
-    .gallery { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 380px) { .gallery { grid-template-columns: 1fr; } }
 
+  /* ── Card ── */
   .card {
     background: var(--surface); border: 0.5px solid var(--border);
     border-radius: var(--radius); overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color 0.2s, transform 0.2s, opacity 0.3s;
+    animation: cardIn 0.3s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
   }
 
   .card:hover { border-color: var(--border2); transform: translateY(-2px); }
@@ -228,7 +241,34 @@
     -webkit-backdrop-filter: blur(6px); letter-spacing: 0.02em;
   }
 
-  /* ── NSFW cover ── */
+  /* Favourite button on card */
+  .fav-btn-card {
+    position: absolute; top: 8px; right: 8px; z-index: 3;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0,0,0,0.45); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+  }
+
+  .card:hover .fav-btn-card,
+  .fav-btn-card.active { opacity: 1; }
+  .fav-btn-card.active { background: rgba(224,85,85,0.85); }
+  .fav-btn-card svg { width: 14px; height: 14px; stroke: #fff; fill: none; }
+  .fav-btn-card.active svg { fill: #fff; }
+
+  /* Style badge */
+  .style-badge {
+    position: absolute; bottom: 9px; right: 9px;
+    background: rgba(0,0,0,0.52); color: #fff;
+    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    border-radius: 999px; backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px); letter-spacing: 0.04em;
+    pointer-events: none; z-index: 1;
+  }
+
+  /* NSFW */
   .nsfw-cover {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
@@ -238,32 +278,24 @@
   }
 
   .nsfw-cover.hidden { display: none; }
-
   .nsfw-blur { filter: blur(18px); transform: scale(1.08); }
-
   .card:hover .img-area .nsfw-blur { transform: scale(1.08); }
 
   .nsfw-label {
-    background: rgba(0,0,0,0.68);
-    color: #fff; font-size: 11px; font-weight: 500;
-    padding: 4px 12px; border-radius: 999px;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    pointer-events: none;
+    background: rgba(0,0,0,0.68); color: #fff;
+    font-size: 11px; font-weight: 500; padding: 4px 12px;
+    border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); pointer-events: none;
   }
 
-  .nsfw-hint {
-    font-size: 11px; color: rgba(255,255,255,0.65);
-    pointer-events: none;
-  }
+  .nsfw-hint { font-size: 11px; color: rgba(255,255,255,0.65); pointer-events: none; }
 
   .nsfw-badge {
     position: absolute; top: 9px; right: 9px;
     background: rgba(180,40,40,0.82); color: #fff;
     font-size: 10px; font-weight: 500; padding: 2px 8px;
     border-radius: 999px; letter-spacing: 0.06em;
-    text-transform: uppercase; z-index: 3;
-    pointer-events: none;
+    text-transform: uppercase; z-index: 3; pointer-events: none;
   }
 
   .card-body { padding: 12px 14px 14px; }
@@ -294,32 +326,19 @@
   .copy-btn.copied { color: var(--success); border-color: var(--success); }
   .copy-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 
-  /* ── Style filter row ── */
-  .style-filter {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    margin-bottom: 1rem;
+  /* ── Sentinel (infinite scroll trigger) ── */
+  .scroll-sentinel {
+    height: 1px; grid-column: 1 / -1;
   }
 
-  .style-tab {
-    padding: 5px 14px; font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
-    border: 0.5px solid var(--border2); border-radius: 999px;
-    background: var(--surface); color: var(--text2);
-    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  .load-more-spinner {
+    grid-column: 1 / -1; text-align: center;
+    padding: 1.5rem; display: none;
   }
 
-  .style-tab:hover { background: var(--surface2); color: var(--text); }
-  .style-tab.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .load-more-spinner.visible { display: block; }
 
-  /* ── Style badge on cards ── */
-  .style-badge {
-    position: absolute; bottom: 9px; right: 9px;
-    background: rgba(0,0,0,0.52); color: #fff;
-    font-size: 10px; font-weight: 500; padding: 2px 8px;
-    border-radius: 999px; backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px); letter-spacing: 0.04em;
-    pointer-events: none; z-index: 1;
-  }
+  .load-more-spinner .spinner { margin: 0 auto; }
 
   /* ── Empty state ── */
   .empty-state {
@@ -328,6 +347,46 @@
   }
 
   .empty-state p { font-size: 14px; margin-bottom: 8px; }
+
+  /* ── Related images strip ── */
+  .related-strip {
+    display: none;
+    margin-top: 2rem; padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .related-strip.visible { display: block; }
+
+  .related-title {
+    font-size: 11px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--text3); margin-bottom: 1rem;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  @media (max-width: 600px) {
+    .related-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  }
+
+  .related-card {
+    border-radius: var(--radius-sm); overflow: hidden;
+    cursor: zoom-in; position: relative;
+    border: 0.5px solid var(--border);
+    transition: border-color 0.15s, transform 0.15s;
+    animation: cardIn 0.3s ease both;
+  }
+
+  .related-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .related-card img {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;
+  }
+
+  .related-card .nomi-badge { font-size: 10px; padding: 2px 7px; }
 
   /* ── Lightbox ── */
   .lightbox {
@@ -344,7 +403,8 @@
     max-width: min(880px, 90vw); max-height: 76vh;
     display: flex; align-items: center; justify-content: center;
     animation: lbIn 0.22s cubic-bezier(0.22,1,0.36,1);
-    cursor: default;
+    cursor: default; touch-action: none; user-select: none;
+    overflow: hidden; position: relative;
   }
 
   @keyframes lbIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
@@ -353,6 +413,8 @@
     max-width: 100%; max-height: 76vh; object-fit: contain;
     border-radius: var(--radius); display: block;
     box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    transition: transform 0.1s ease;
+    transform-origin: center center;
   }
 
   .lightbox-close {
@@ -410,13 +472,26 @@
     background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2);
     border-radius: var(--radius-sm); color: rgba(255,255,255,0.8);
     cursor: pointer; white-space: nowrap; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
   }
 
   .lightbox-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
   .lightbox-btn.copied { color: #6ee7a8; border-color: rgba(110,231,168,0.4); }
   .lightbox-btn.slideshow-active { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+  .lightbox-btn.fav-active { color: #f87171; border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); }
+  .lightbox-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-  /* ── Slideshow progress bar ── */
+  /* Zoom hint */
+  .zoom-hint {
+    position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: rgba(255,255,255,0.3); pointer-events: none;
+    z-index: 1001; white-space: nowrap; opacity: 1;
+    transition: opacity 0.5s;
+  }
+
+  .zoom-hint.hidden { opacity: 0; }
+
+  /* ── Slideshow ── */
   .slideshow-bar {
     position: fixed; bottom: 0; left: 0; right: 0; height: 3px;
     background: rgba(255,255,255,0.1); z-index: 1002; display: none;
@@ -445,7 +520,7 @@
     padding: 0 0 env(safe-area-inset-bottom, 16px);
     transform: translateY(100%);
     transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    max-height: 80vh;
+    max-height: 85vh;
     display: flex; flex-direction: column;
   }
 
@@ -453,29 +528,22 @@
 
   .sheet-handle {
     width: 36px; height: 4px; border-radius: 2px;
-    background: var(--border2); margin: 12px auto 0;
-    flex-shrink: 0;
+    background: var(--border2); margin: 12px auto 0; flex-shrink: 0;
   }
 
   .sheet-img-wrap {
     width: 100%; aspect-ratio: 1/1;
-    overflow: hidden; flex-shrink: 0;
-    background: #000;
+    overflow: hidden; flex-shrink: 0; background: #000;
   }
 
-  .sheet-img-wrap img {
-    width: 100%; height: 100%; object-fit: contain; display: block;
-  }
+  .sheet-img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
   .sheet-nav-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 16px 0; flex-shrink: 0;
   }
 
-  .sheet-counter {
-    font-size: 12px; color: var(--text3);
-  }
-
+  .sheet-counter { font-size: 12px; color: var(--text3); }
   .sheet-nav-btns { display: flex; gap: 8px; }
 
   .sheet-nav-btn {
@@ -487,17 +555,13 @@
   }
 
   .sheet-nav-btn:disabled { opacity: 0.25; pointer-events: none; }
-  .sheet-nav-btn:hover { background: var(--surface2); color: var(--text); }
 
   .sheet-body {
-    padding: 14px 20px 20px;
-    overflow-y: auto; flex: 1;
+    padding: 14px 20px 20px; overflow-y: auto; flex: 1;
     display: flex; flex-direction: column; gap: 12px;
   }
 
-  .sheet-meta-row {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  }
+  .sheet-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
   .sheet-nomi {
     font-size: 11px; font-weight: 500; text-transform: uppercase;
@@ -507,8 +571,7 @@
   .sheet-style-badge {
     font-size: 10px; font-weight: 500; text-transform: uppercase;
     letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px;
-    border: 0.5px solid var(--border2); color: var(--text2);
-    background: var(--surface2);
+    border: 0.5px solid var(--border2); color: var(--text2); background: var(--surface2);
   }
 
   .sheet-nsfw-badge {
@@ -518,33 +581,40 @@
     color: rgba(220,80,80,0.85); background: rgba(220,80,80,0.08);
   }
 
-  .sheet-prompt {
-    font-size: 14px; color: var(--text); line-height: 1.65;
-  }
+  .sheet-prompt { font-size: 14px; color: var(--text); line-height: 1.65; }
+  .sheet-filename { font-size: 11px; color: var(--text3); font-style: italic; }
 
-  .sheet-filename {
-    font-size: 11px; color: var(--text3); font-style: italic;
-  }
+  .sheet-actions { display: flex; gap: 8px; }
 
   .sheet-copy-btn {
-    width: 100%; padding: 13px;
-    font-size: 14px; font-weight: 500;
+    flex: 1; padding: 13px; font-size: 14px; font-weight: 500;
     font-family: 'DM Sans', sans-serif;
     background: var(--accent); color: var(--accent-fg);
     border: none; border-radius: var(--radius-sm);
-    cursor: pointer; transition: opacity 0.15s;
-    flex-shrink: 0;
+    cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
   }
 
   .sheet-copy-btn:active { opacity: 0.8; }
   .sheet-copy-btn.copied { opacity: 0.7; }
+
+  .sheet-fav-btn {
+    width: 50px; padding: 13px; font-size: 18px;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+
+  .sheet-fav-btn.active { background: rgba(224,85,85,0.12); border-color: rgba(224,85,85,0.4); }
+  .sheet-fav-btn svg { width: 18px; height: 18px; stroke: var(--text2); fill: none; }
+  .sheet-fav-btn.active svg { stroke: var(--fav); fill: var(--fav); }
 
   /* Hide bottom sheet on desktop */
   @media (min-width: 601px) {
     .bottom-sheet-backdrop, .bottom-sheet { display: none !important; }
   }
 
-  /* On mobile: lightbox shows image only, no meta */
+  /* On mobile: lightbox image only, no meta */
   @media (max-width: 600px) {
     .lightbox-meta { display: none; }
     .lightbox { padding: 0; justify-content: center; }
@@ -565,6 +635,10 @@
   }
 
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Gallery fade transition ── */
+  .gallery.fading { opacity: 0; transition: opacity 0.15s; }
+  .gallery.visible { opacity: 1; transition: opacity 0.2s; }
 </style>
 </head>
 <body>
@@ -594,6 +668,18 @@
   <div class="toolbar">
     <div class="stats-bar" id="statsBar"></div>
     <div class="toolbar-actions">
+      <select class="sort-select" id="sortSelect" onchange="onSortChange()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="nomi_az">Nomi A→Z</option>
+        <option value="nomi_za">Nomi Z→A</option>
+      </select>
+      <button class="toolbar-btn" id="favFilterBtn" onclick="toggleFavFilter()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/>
+        </svg>
+        Favourites
+      </button>
       <button class="toolbar-btn" onclick="startSlideshow()">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <polygon points="5,3 13,8 5,13"/>
@@ -604,6 +690,11 @@
   </div>
 
   <div class="gallery" id="gallery"></div>
+  <div class="load-more-spinner" id="loadMoreSpinner"><div class="spinner"></div></div>
+  <div class="related-strip" id="relatedStrip">
+    <div class="related-title" id="relatedTitle">Related images</div>
+    <div class="related-grid" id="relatedGrid"></div>
+  </div>
 </div>
 
 <!-- Lightbox -->
@@ -612,7 +703,7 @@
   <div class="lightbox-counter" id="lbCounter"></div>
   <button class="lightbox-nav prev" id="lbPrev" onclick="lbNav(-1, event)">&#8249;</button>
   <button class="lightbox-nav next" id="lbNext" onclick="lbNav(1, event)">&#8250;</button>
-  <div class="lightbox-img-wrap" onclick="event.stopPropagation()">
+  <div class="lightbox-img-wrap" id="lbImgWrap" onclick="event.stopPropagation()">
     <img id="lbImg" src="" alt="">
   </div>
   <div class="lightbox-meta" onclick="event.stopPropagation()">
@@ -622,11 +713,19 @@
       <div class="lightbox-filename" id="lbFilename"></div>
     </div>
     <div class="lightbox-actions">
-      <button class="lightbox-btn" id="lbCopyBtn" onclick="lbCopy()">Copy prompt</button>
+      <button class="lightbox-btn" id="lbCopyBtn" onclick="lbCopy()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+        Copy prompt
+      </button>
+      <button class="lightbox-btn" id="lbFavBtn" onclick="lbToggleFav()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/></svg>
+        Favourite
+      </button>
       <button class="lightbox-btn" id="lbSlideshowBtn" onclick="toggleSlideshow()">Slideshow</button>
     </div>
   </div>
 </div>
+<div class="zoom-hint" id="zoomHint">Scroll to zoom · Double-click to reset</div>
 
 <div class="slideshow-bar" id="slideshowBar">
   <div class="slideshow-progress" id="slideshowProgress"></div>
@@ -654,42 +753,75 @@
     </div>
     <div class="sheet-prompt" id="sheetPrompt"></div>
     <div class="sheet-filename" id="sheetFilename"></div>
-    <button class="sheet-copy-btn" id="sheetCopyBtn" onclick="sheetCopy()">Copy prompt</button>
+    <div class="sheet-actions">
+      <button class="sheet-copy-btn" id="sheetCopyBtn" onclick="sheetCopy()">Copy prompt</button>
+      <button class="sheet-fav-btn" id="sheetFavBtn" onclick="sheetToggleFav()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  let allEntries = [];
-  let activeNomi = 'All';
-  let activeStyle = 'All';
-  let hasStyles = false;
-  let lbIndex = 0;
-  let lbFiltered = [];
-  let slideshowTimer = null;
+  // ── CONFIGURATION ─────────────────────────────────────
+  // Set dataSource to 'local' for GitHub Pages / local server (toolkit default)
+  // Set dataSource to 'remote' and fill in remoteUrl for R2, CDN, or any web server
+  const CONFIG = {
+    dataSource: 'local',
+    remoteUrl:  '',
+    workerUrl:  '',
+  };
+
+  function csvUrl()           { return CONFIG.dataSource === 'remote' ? `${CONFIG.remoteUrl}/prompts.csv`       : 'prompts.csv'; }
+  function imageUrl(filename) { return CONFIG.dataSource === 'remote' ? `${CONFIG.remoteUrl}/images/${filename}` : `images/${filename}`; }
+  // ──────────────────────────────────────────────────────
+
+  const PAGE_SIZE = 15;
+
+  let allEntries    = [];
+  let activeNomi    = 'All';
+  let activeStyle   = 'All';
+  let activeSort    = 'newest';
+  let showFavsOnly  = false;
+  let hasStyles     = false;
+  let favourites    = {};   // filename → true (localStorage fallback or from CSV)
+  let lbIndex       = 0;
+  let lbFiltered    = [];
+  let renderedCount = 0;
+  let slideshowTimer  = null;
   let slideshowActive = false;
   const SLIDESHOW_INTERVAL = 5000;
 
   // ── Init ──────────────────────────────────────────────
   async function init() {
-    // Restore state from URL params
-    const params = new URLSearchParams(window.location.search);
-    const savedNomi = params.get('nomi') || localStorage.getItem('nomi_gallery_nomi') || 'All';
-    const savedSearch = params.get('q') || localStorage.getItem('nomi_gallery_search') || '';
+    const params     = new URLSearchParams(window.location.search);
+    const savedNomi  = params.get('nomi')  || localStorage.getItem('nomi_gallery_nomi')  || 'All';
+    const savedSearch= params.get('q')     || localStorage.getItem('nomi_gallery_search')|| '';
     const savedStyle = params.get('style') || localStorage.getItem('nomi_gallery_style') || 'All';
+    const savedSort  = localStorage.getItem('nomi_gallery_sort') || 'newest';
+
+    // Load local favourites fallback
+    try { favourites = JSON.parse(localStorage.getItem('nomi_gallery_favs') || '{}'); } catch(e) { favourites = {}; }
 
     try {
-      const res = await fetch('prompts.csv');
+      const res = await fetch(csvUrl());
       if (!res.ok) throw new Error('CSV not found');
       const text = await res.text();
       allEntries = parseCSV(text);
-
       if (!allEntries.length) throw new Error('No entries in CSV');
 
-      activeNomi = allEntries.find(e => e.nomi === savedNomi) ? savedNomi : 'All';
+      // Merge favourites from CSV (remote mode)
+      if (CONFIG.dataSource === 'remote') {
+        allEntries.forEach(e => { if (e.favourite) favourites[e.filename] = true; });
+      }
+
+      activeNomi  = allEntries.find(e => e.nomi === savedNomi) ? savedNomi : 'All';
       activeStyle = savedStyle;
+      activeSort  = savedSort;
       document.getElementById('searchInput').value = savedSearch;
+      document.getElementById('sortSelect').value  = savedSort;
 
       document.getElementById('loadingState').classList.remove('visible');
       document.getElementById('mainContent').style.display = 'block';
@@ -698,11 +830,12 @@
       buildTabs();
       buildStyleFilter();
       render();
+      initInfiniteScroll();
 
     } catch(err) {
       document.getElementById('loadingState').innerHTML =
         `<p style="color:var(--text2); font-size:14px;">Could not load <code style="font-family:monospace;font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:4px;">prompts.csv</code></p>
-         <p style="font-size:13px; color:var(--text3); margin-top:8px;">Make sure this file is in the same folder as gallery.html and the site is served over HTTP (not opened as a local file).</p>`;
+         <p style="font-size:13px; color:var(--text3); margin-top:8px;">Make sure this file is in the same folder as gallery.html and the site is served over HTTP.</p>`;
     }
   }
 
@@ -716,36 +849,51 @@
       const first = line.indexOf(','), second = line.indexOf(',', first + 1);
       if (first === -1 || second === -1) continue;
       const filename = line.slice(0, first).trim();
-      const nomi = line.slice(first + 1, second).trim();
+      const nomi     = line.slice(first + 1, second).trim();
       let rest = line.slice(second + 1).trim();
+      let prompt = rest, nsfw = false, style = '', favourite = false;
 
-      let prompt = rest, nsfw = false, style = '';
       if (rest.startsWith('"')) {
-        const closeQuote = rest.indexOf('"', 1);
-        if (closeQuote !== -1) {
-          prompt = rest.slice(1, closeQuote);
-          const after = rest.slice(closeQuote + 1).trim();
+        const cq = rest.indexOf('"', 1);
+        if (cq !== -1) {
+          prompt = rest.slice(1, cq);
+          const after = rest.slice(cq + 1).trim();
           if (after.startsWith(',')) {
-            const afterFields = after.slice(1).split(',');
-            nsfw = afterFields[0].trim().toLowerCase() === 'true';
-            style = afterFields[1] ? afterFields[1].trim() : '';
+            const fields = after.slice(1).split(',');
+            nsfw      = fields[0]?.trim().toLowerCase() === 'true';
+            style     = fields[1]?.trim() || '';
+            favourite = fields[2]?.trim().toLowerCase() === 'true';
           }
         }
       } else {
         const parts = rest.split(',');
-        const last = parts[parts.length - 1].trim();
-        const secondLast = parts[parts.length - 2] ? parts[parts.length - 2].trim().toLowerCase() : '';
-        const lastLower = last.toLowerCase();
-        if (lastLower === 'realistic' || lastLower === 'anime' || lastLower === 'mix') {
-          style = last;
-          nsfw = secondLast === 'true';
+        const last  = parts[parts.length - 1].trim().toLowerCase();
+        const prev  = parts[parts.length - 2]?.trim().toLowerCase() || '';
+        const prev2 = parts[parts.length - 3]?.trim().toLowerCase() || '';
+        if (last === 'true' || last === 'false') {
+          // Could be favourite column
+          favourite = last === 'true';
+          const styleCand = parts[parts.length - 2]?.trim().toLowerCase();
+          if (styleCand === 'realistic' || styleCand === 'anime' || styleCand === 'mix' || styleCand === '') {
+            style = parts[parts.length - 2]?.trim() || '';
+            nsfw  = prev2 === 'true';
+            prompt = parts.slice(0, parts.length - 3).join(',').trim();
+          } else if (prev === 'true' || prev === 'false') {
+            nsfw  = prev === 'true';
+            prompt = parts.slice(0, parts.length - 2).join(',').trim();
+          } else {
+            prompt = parts.slice(0, parts.length - 1).join(',').trim();
+          }
+        } else if (last === 'realistic' || last === 'anime' || last === 'mix' || last === '') {
+          style = parts[parts.length - 1].trim();
+          nsfw  = prev === 'true';
           prompt = parts.slice(0, parts.length - 2).join(',').trim();
-        } else if (lastLower === 'true' || lastLower === 'false') {
-          nsfw = lastLower === 'true';
+        } else if (prev === 'true' || prev === 'false') {
+          nsfw  = prev === 'true';
           prompt = parts.slice(0, parts.length - 1).join(',').trim();
         }
       }
-      entries.push({ filename, nomi, prompt, nsfw, style });
+      entries.push({ filename, nomi, prompt, nsfw, style, favourite });
     }
     hasStyles = entries.some(e => e.style);
     return entries;
@@ -761,11 +909,13 @@
     ).join('');
   }
 
-  function setNomi(n) {
-    activeNomi = n;
-    buildTabs();
-    render();
-    saveState();
+  function setNomi(n) { activeNomi = n; buildTabs(); renderWithTransition(); saveState(); }
+  function onSearch() { renderWithTransition(); saveState(); }
+  function onSortChange() { activeSort = document.getElementById('sortSelect').value; renderWithTransition(); saveState(); }
+  function toggleFavFilter() {
+    showFavsOnly = !showFavsOnly;
+    document.getElementById('favFilterBtn').classList.toggle('active', showFavsOnly);
+    renderWithTransition();
   }
 
   function buildStyleFilter() {
@@ -779,42 +929,56 @@
       ).join('');
   }
 
-  function setStyle(s) {
-    activeStyle = s;
-    buildStyleFilter();
-    render();
-    saveState();
-  }
-
-  function onSearch() { render(); saveState(); }
+  function setStyle(s) { activeStyle = s; buildStyleFilter(); renderWithTransition(); saveState(); }
 
   // ── State persistence ─────────────────────────────────
   function saveState() {
     const q = document.getElementById('searchInput').value.trim();
-    localStorage.setItem('nomi_gallery_nomi', activeNomi);
+    localStorage.setItem('nomi_gallery_nomi',   activeNomi);
     localStorage.setItem('nomi_gallery_search', q);
-    localStorage.setItem('nomi_gallery_style', activeStyle);
+    localStorage.setItem('nomi_gallery_style',  activeStyle);
+    localStorage.setItem('nomi_gallery_sort',   activeSort);
     const params = new URLSearchParams();
-    if (activeNomi !== 'All') params.set('nomi', activeNomi);
-    if (q) params.set('q', q);
+    if (activeNomi  !== 'All') params.set('nomi',  activeNomi);
+    if (q)                     params.set('q',     q);
     if (activeStyle !== 'All') params.set('style', activeStyle);
-    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-    history.replaceState(null, '', newUrl);
+    history.replaceState(null, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
+  }
+
+  // ── Filter + sort ─────────────────────────────────────
+  function getFiltered() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    let list = allEntries.filter(e =>
+      (activeNomi  === 'All' || e.nomi  === activeNomi)  &&
+      (activeStyle === 'All' || e.style === activeStyle) &&
+      (!showFavsOnly || favourites[e.filename])          &&
+      (!q || e.prompt.toLowerCase().includes(q) || e.nomi.toLowerCase().includes(q) || e.filename.toLowerCase().includes(q))
+    );
+    switch (activeSort) {
+      case 'oldest':  list = [...list].reverse(); break;
+      case 'nomi_az': list = [...list].sort((a,b) => a.nomi.localeCompare(b.nomi)); break;
+      case 'nomi_za': list = [...list].sort((a,b) => b.nomi.localeCompare(a.nomi)); break;
+      // 'newest' is default CSV order (newest last → show reversed)
+    }
+    return list;
+  }
+
+  // ── Render with fade transition ────────────────────────
+  function renderWithTransition() {
+    const gallery = document.getElementById('gallery');
+    gallery.classList.add('fading');
+    setTimeout(() => {
+      render();
+      gallery.classList.remove('fading');
+      gallery.classList.add('visible');
+    }, 150);
   }
 
   // ── Render ────────────────────────────────────────────
-  function getFiltered() {
-    const q = document.getElementById('searchInput').value.toLowerCase().trim();
-    return allEntries.filter(e =>
-      (activeNomi === 'All' || e.nomi === activeNomi) &&
-      (activeStyle === 'All' || e.style === activeStyle) &&
-      (!q || e.prompt.toLowerCase().includes(q) || e.nomi.toLowerCase().includes(q) || e.filename.toLowerCase().includes(q))
-    );
-  }
-
   function render() {
     const filtered = getFiltered();
-    const q = document.getElementById('searchInput').value.trim();
+    renderedCount  = 0;
+    const q     = document.getElementById('searchInput').value.trim();
     const total = allEntries.filter(e => activeNomi === 'All' || e.nomi === activeNomi).length;
 
     document.getElementById('statsBar').textContent = q
@@ -825,45 +989,104 @@
       `${allEntries.length} images · ${new Set(allEntries.map(e=>e.nomi)).size} Nomis`;
 
     const gallery = document.getElementById('gallery');
+    document.getElementById('relatedStrip').classList.remove('visible');
 
     if (!filtered.length) {
       gallery.innerHTML = `<div class="empty-state"><p>No images match your search.</p></div>`;
       return;
     }
 
-    gallery.innerHTML = filtered.map((e, i) => {
-      const src = `images/${e.filename}`;
-      const nsfwCover = e.nsfw ? `
-        <div class="nsfw-cover" id="nsfw-${i}" onclick="revealNsfw(${i}, event)">
-          <span class="nsfw-label">NSFW</span>
-          <span class="nsfw-hint">Click to reveal</span>
+    // Render first page
+    const firstBatch = filtered.slice(0, PAGE_SIZE);
+    renderedCount = firstBatch.length;
+    gallery.innerHTML = firstBatch.map((e, i) => cardHTML(e, i)).join('') +
+      `<div class="scroll-sentinel" id="scrollSentinel"></div>`;
+
+    attachSentinelObserver(filtered);
+  }
+
+  function cardHTML(e, i) {
+    const src = imageUrl(e.filename);
+    const isFav = !!favourites[e.filename];
+    const nsfwCover = e.nsfw ? `
+      <div class="nsfw-cover" id="nsfw-${i}" onclick="revealNsfw(${i}, event)">
+        <span class="nsfw-label">NSFW</span>
+        <span class="nsfw-hint">Click to reveal</span>
+      </div>
+      <span class="nsfw-badge">NSFW</span>` : '';
+    return `<div class="card">
+      <div class="img-area" onclick="onImgAreaClick(${i}, event)">
+        <img src="${src}" alt="${e.nomi}" loading="lazy"
+          id="img-${i}" class="${e.nsfw ? 'nsfw-blur' : ''}"
+          onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.2\\' stroke-linecap=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg><span>${e.filename}</span></div>'">
+        <span class="nomi-badge">${e.nomi}</span>
+        ${e.style ? `<span class="style-badge">${e.style}</span>` : ''}
+        ${nsfwCover}
+        <button class="fav-btn-card ${isFav ? 'active' : ''}" onclick="toggleFav('${e.filename}', event)" title="${isFav ? 'Remove favourite' : 'Add to favourites'}">
+          <svg viewBox="0 0 16 16" fill="${isFav ? '#fff' : 'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <p class="prompt-text">${e.prompt}</p>
+        <div class="card-footer">
+          <span class="filename">${e.filename}</span>
+          <button class="copy-btn" data-prompt="${e.prompt.replace(/"/g,'&quot;')}" onclick="copyPrompt(this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="5" y="5" width="9" height="9" rx="1.5"/>
+              <path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/>
+            </svg>
+            Copy prompt
+          </button>
         </div>
-        <span class="nsfw-badge">NSFW</span>` : '';
-      return `<div class="card">
-        <div class="img-area" onclick="onImgAreaClick(${i}, event)">
-          <img src="${src}" alt="${e.nomi}" loading="lazy"
-            id="img-${i}"
-            class="${e.nsfw ? 'nsfw-blur' : ''}"
-            onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.2\\' stroke-linecap=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg><span>${e.filename}</span></div>'">
-          <span class="nomi-badge">${e.nomi}</span>
-          ${e.style ? `<span class="style-badge">${e.style}</span>` : ''}
-          ${nsfwCover}
-        </div>
-        <div class="card-body">
-          <p class="prompt-text">${e.prompt}</p>
-          <div class="card-footer">
-            <span class="filename">${e.filename}</span>
-            <button class="copy-btn" data-prompt="${e.prompt.replace(/"/g,'&quot;')}" onclick="copyPrompt(this)">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                <rect x="5" y="5" width="9" height="9" rx="1.5"/>
-                <path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/>
-              </svg>
-              Copy prompt
-            </button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+      </div>
+    </div>`;
+  }
+
+  // ── Infinite scroll ───────────────────────────────────
+  let sentinelObserver = null;
+
+  function initInfiniteScroll() {
+    sentinelObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMoreCards();
+    }, { rootMargin: '200px' });
+  }
+
+  function attachSentinelObserver(filtered) {
+    if (sentinelObserver) {
+      const sentinel = document.getElementById('scrollSentinel');
+      if (sentinel) sentinelObserver.observe(sentinel);
+    }
+    // Store filtered list for load more
+    window._currentFiltered = filtered;
+  }
+
+  function loadMoreCards() {
+    const filtered = window._currentFiltered || [];
+    if (renderedCount >= filtered.length) return;
+
+    const spinner = document.getElementById('loadMoreSpinner');
+    spinner.classList.add('visible');
+
+    setTimeout(() => {
+      const nextBatch = filtered.slice(renderedCount, renderedCount + PAGE_SIZE);
+      renderedCount += nextBatch.length;
+
+      const sentinel = document.getElementById('scrollSentinel');
+      if (sentinel) sentinel.remove();
+
+      const gallery = document.getElementById('gallery');
+      const offset  = renderedCount - nextBatch.length;
+      gallery.innerHTML += nextBatch.map((e, i) => cardHTML(e, offset + i)).join('');
+
+      if (renderedCount < filtered.length) {
+        gallery.innerHTML += `<div class="scroll-sentinel" id="scrollSentinel"></div>`;
+        attachSentinelObserver(filtered);
+      }
+
+      spinner.classList.remove('visible');
+    }, 100);
   }
 
   function copyPrompt(btn) {
@@ -878,106 +1101,129 @@
     });
   }
 
+  // ── Favourites ────────────────────────────────────────
+  function toggleFav(filename, e) {
+    if (e) e.stopPropagation();
+    const isFav = !!favourites[filename];
+    if (isFav) delete favourites[filename];
+    else favourites[filename] = true;
+
+    // Persist locally always
+    localStorage.setItem('nomi_gallery_favs', JSON.stringify(favourites));
+
+    // Write back to CSV via Worker if remote
+    if (CONFIG.dataSource === 'remote' && CONFIG.workerUrl) {
+      fetch(`${CONFIG.workerUrl}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, favourite: !isFav }),
+      }).catch(() => {}); // silent fail — localStorage already has it
+    }
+
+    // Update allEntries in memory
+    const entry = allEntries.find(e => e.filename === filename);
+    if (entry) entry.favourite = !isFav;
+
+    // Re-render card fav button without full re-render
+    updateFavButtons(filename, !isFav);
+    showToast(!isFav ? '♥ Added to favourites' : 'Removed from favourites');
+  }
+
+  function updateFavButtons(filename, isFav) {
+    // Update all card fav buttons matching this filename
+    document.querySelectorAll('.fav-btn-card').forEach(btn => {
+      const card = btn.closest('.card');
+      if (!card) return;
+      const fn = card.querySelector('.filename')?.textContent;
+      if (fn !== filename) return;
+      btn.classList.toggle('active', isFav);
+      btn.title = isFav ? 'Remove favourite' : 'Add to favourites';
+      btn.querySelector('svg').setAttribute('fill', isFav ? '#fff' : 'none');
+    });
+    // Update lightbox fav button if open
+    updateLbFavBtn();
+    // Update sheet fav button if open
+    updateSheetFavBtn();
+  }
+
+  function updateLbFavBtn() {
+    const e = lbFiltered[lbIndex];
+    if (!e) return;
+    const isFav = !!favourites[e.filename];
+    const btn = document.getElementById('lbFavBtn');
+    btn.classList.toggle('fav-active', isFav);
+    btn.querySelector('svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
+    btn.childNodes[btn.childNodes.length - 1].textContent = isFav ? ' Unfavourite' : ' Favourite';
+  }
+
+  function updateSheetFavBtn() {
+    const e = lbFiltered[lbIndex];
+    if (!e) return;
+    const isFav = !!favourites[e.filename];
+    const btn = document.getElementById('sheetFavBtn');
+    btn.classList.toggle('active', isFav);
+  }
+
+  function lbToggleFav() {
+    const e = lbFiltered[lbIndex];
+    if (e) toggleFav(e.filename, null);
+  }
+
+  function sheetToggleFav() {
+    const e = lbFiltered[lbIndex];
+    if (e) toggleFav(e.filename, null);
+  }
+
   // ── NSFW reveal ───────────────────────────────────────
-  // Track which cards have been revealed this session
   const revealedSet = new Set();
 
   function revealNsfw(i, e) {
     e.stopPropagation();
     revealedSet.add(i);
     const cover = document.getElementById(`nsfw-${i}`);
-    const img = document.getElementById(`img-${i}`);
+    const img   = document.getElementById(`img-${i}`);
     if (cover) cover.classList.add('hidden');
-    if (img) img.classList.remove('nsfw-blur');
+    if (img)   img.classList.remove('nsfw-blur');
   }
 
   function onImgAreaClick(i, e) {
-    // If NSFW cover is still showing, let it handle the click
     const cover = document.getElementById(`nsfw-${i}`);
     if (cover && !cover.classList.contains('hidden')) return;
-    if (window.innerWidth <= 600) {
-      openSheet(i);
-    } else {
-      openLightbox(i);
-    }
-  }
-
-  // ── Mobile bottom sheet ───────────────────────────────
-  function openSheet(i) {
-    lbFiltered = getFiltered();
-    lbIndex = i;
-    showSheetEntry();
-    document.getElementById('sheetBackdrop').classList.add('open');
-    requestAnimationFrame(() => {
-      document.getElementById('bottomSheet').classList.add('open');
-    });
-    document.body.style.overflow = 'hidden';
-  }
-
-  function showSheetEntry() {
-    const e = lbFiltered[lbIndex];
-    if (!e) return;
-    document.getElementById('sheetImg').src = `images/${e.filename}`;
-    document.getElementById('sheetNomi').textContent = e.nomi;
-    document.getElementById('sheetPrompt').textContent = e.prompt;
-    document.getElementById('sheetFilename').textContent = e.filename;
-    document.getElementById('sheetCounter').textContent = `${lbIndex + 1} / ${lbFiltered.length}`;
-    document.getElementById('sheetPrev').disabled = lbIndex === 0;
-    document.getElementById('sheetNext').disabled = lbIndex === lbFiltered.length - 1;
-    const styleEl = document.getElementById('sheetStyle');
-    if (e.style) { styleEl.textContent = e.style; styleEl.style.display = ''; }
-    else { styleEl.style.display = 'none'; }
-    document.getElementById('sheetNsfw').style.display = e.nsfw ? '' : 'none';
-    const copyBtn = document.getElementById('sheetCopyBtn');
-    copyBtn.textContent = 'Copy prompt';
-    copyBtn.classList.remove('copied');
-    copyBtn.dataset.prompt = e.prompt;
-    // Scroll body back to top when navigating
-    document.querySelector('.sheet-body').scrollTop = 0;
-  }
-
-  function sheetNav(dir) {
-    lbIndex = Math.max(0, Math.min(lbFiltered.length - 1, lbIndex + dir));
-    showSheetEntry();
-  }
-
-  function closeSheet() {
-    document.getElementById('bottomSheet').classList.remove('open');
-    document.getElementById('sheetBackdrop').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function sheetCopy() {
-    const btn = document.getElementById('sheetCopyBtn');
-    navigator.clipboard.writeText(btn.dataset.prompt).then(() => {
-      btn.textContent = 'Copied!'; btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
-    });
+    if (window.innerWidth <= 600) openSheet(i);
+    else openLightbox(i);
   }
 
   // ── Lightbox ──────────────────────────────────────────
   function openLightbox(i) {
     lbFiltered = getFiltered();
-    lbIndex = i;
+    lbIndex    = i;
     showLbEntry();
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
+    showRelated(lbFiltered[i]);
+    // Show zoom hint briefly
+    const hint = document.getElementById('zoomHint');
+    hint.classList.remove('hidden');
+    setTimeout(() => hint.classList.add('hidden'), 3000);
   }
 
   function showLbEntry() {
     const e = lbFiltered[lbIndex];
     if (!e) return;
-    document.getElementById('lbImg').src = `images/${e.filename}`;
-    document.getElementById('lbNomi').textContent = e.style ? `${e.nomi} · ${e.style}` : e.nomi;
-    document.getElementById('lbPrompt').textContent = e.prompt;
+    const img = document.getElementById('lbImg');
+    img.src = imageUrl(e.filename);
+    img.style.transform = 'scale(1)'; // reset zoom
+    currentZoom = 1;
+    document.getElementById('lbNomi').textContent     = e.style ? `${e.nomi} · ${e.style}` : e.nomi;
+    document.getElementById('lbPrompt').textContent   = e.prompt;
     document.getElementById('lbFilename').textContent = e.filename;
-    document.getElementById('lbCounter').textContent = `${lbIndex + 1} / ${lbFiltered.length}`;
+    document.getElementById('lbCounter').textContent  = `${lbIndex + 1} / ${lbFiltered.length}`;
     document.getElementById('lbPrev').disabled = lbIndex === 0;
     document.getElementById('lbNext').disabled = lbIndex === lbFiltered.length - 1;
     const copyBtn = document.getElementById('lbCopyBtn');
-    copyBtn.textContent = 'Copy prompt';
-    copyBtn.classList.remove('copied');
     copyBtn.dataset.prompt = e.prompt;
+    updateLbFavBtn();
+    showRelated(e);
   }
 
   function lbNav(dir, e) {
@@ -995,22 +1241,173 @@
     document.getElementById('lightbox').classList.remove('open');
     document.body.style.overflow = '';
     stopSlideshow();
+    document.getElementById('relatedStrip').classList.remove('visible');
   }
 
   function lbCopy() {
     const btn = document.getElementById('lbCopyBtn');
+    navigator.clipboard.writeText(btn.dataset.prompt).then(() => {
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    });
+  }
+
+  // ── Pinch to zoom (desktop scroll + double-click) ─────
+  let currentZoom = 1;
+  const MIN_ZOOM  = 1;
+  const MAX_ZOOM  = 4;
+
+  document.getElementById('lbImgWrap').addEventListener('wheel', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.15 : 0.15;
+    currentZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom + delta));
+    document.getElementById('lbImg').style.transform = `scale(${currentZoom})`;
+  }, { passive: false });
+
+  document.getElementById('lbImg').addEventListener('dblclick', () => {
+    currentZoom = 1;
+    document.getElementById('lbImg').style.transform = 'scale(1)';
+  });
+
+  // Pinch zoom on touch
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1;
+
+  document.getElementById('lbImgWrap').addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      pinchStartDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchStartZoom = currentZoom;
+    }
+  }, { passive: true });
+
+  document.getElementById('lbImgWrap').addEventListener('touchmove', e => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      currentZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchStartZoom * (dist / pinchStartDist)));
+      document.getElementById('lbImg').style.transform = `scale(${currentZoom})`;
+    }
+  }, { passive: false });
+
+  // ── Mobile bottom sheet ───────────────────────────────
+  function openSheet(i) {
+    lbFiltered = getFiltered();
+    lbIndex    = i;
+    showSheetEntry();
+    document.getElementById('sheetBackdrop').classList.add('open');
+    requestAnimationFrame(() => {
+      document.getElementById('bottomSheet').classList.add('open');
+    });
+    document.body.style.overflow = 'hidden';
+    showRelated(lbFiltered[i]);
+  }
+
+  function showSheetEntry() {
+    const e = lbFiltered[lbIndex];
+    if (!e) return;
+    document.getElementById('sheetImg').src          = imageUrl(e.filename);
+    document.getElementById('sheetNomi').textContent = e.nomi;
+    document.getElementById('sheetPrompt').textContent   = e.prompt;
+    document.getElementById('sheetFilename').textContent = e.filename;
+    document.getElementById('sheetCounter').textContent  = `${lbIndex + 1} / ${lbFiltered.length}`;
+    document.getElementById('sheetPrev').disabled = lbIndex === 0;
+    document.getElementById('sheetNext').disabled = lbIndex === lbFiltered.length - 1;
+    const styleEl = document.getElementById('sheetStyle');
+    if (e.style) { styleEl.textContent = e.style; styleEl.style.display = ''; }
+    else { styleEl.style.display = 'none'; }
+    document.getElementById('sheetNsfw').style.display = e.nsfw ? '' : 'none';
+    const copyBtn = document.getElementById('sheetCopyBtn');
+    copyBtn.textContent    = 'Copy prompt';
+    copyBtn.dataset.prompt = e.prompt;
+    copyBtn.classList.remove('copied');
+    updateSheetFavBtn();
+    document.querySelector('.sheet-body').scrollTop = 0;
+    showRelated(e);
+  }
+
+  function sheetNav(dir) {
+    lbIndex = Math.max(0, Math.min(lbFiltered.length - 1, lbIndex + dir));
+    showSheetEntry();
+  }
+
+  function closeSheet() {
+    document.getElementById('bottomSheet').classList.remove('open');
+    document.getElementById('sheetBackdrop').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('relatedStrip').classList.remove('visible');
+  }
+
+  function sheetCopy() {
+    const btn = document.getElementById('sheetCopyBtn');
     navigator.clipboard.writeText(btn.dataset.prompt).then(() => {
       btn.textContent = 'Copied!'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
     });
   }
 
+  // ── Related images ────────────────────────────────────
+  function getKeywords(prompt) {
+    return prompt.toLowerCase()
+      .replace(/[^a-z0-9_\s]/g, ' ')
+      .split(/[\s,]+/)
+      .filter(w => w.length > 3 &&
+        !['with','this','that','from','have','will','your','also','into'].includes(w));
+  }
+
+  function showRelated(entry) {
+    const keywords = getKeywords(entry.prompt);
+    if (!keywords.length) return;
+
+    const scored = allEntries
+      .filter(e => e.filename !== entry.filename)
+      .map(e => {
+        const eKeywords = getKeywords(e.prompt);
+        const shared    = keywords.filter(k => eKeywords.includes(k)).length;
+        return { entry: e, score: shared };
+      })
+      .filter(r => r.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    const strip = document.getElementById('relatedStrip');
+    if (!scored.length) { strip.classList.remove('visible'); return; }
+
+    document.getElementById('relatedTitle').textContent =
+      `Related images (${scored.length} with shared keywords)`;
+
+    document.getElementById('relatedGrid').innerHTML = scored.map(({ entry: e }) => `
+      <div class="related-card" onclick="openRelated('${e.filename.replace(/'/g,"\\'")}')">
+        <img src="${imageUrl(e.filename)}" alt="${e.nomi}" loading="lazy"
+          onerror="this.style.display='none'">
+        <span class="nomi-badge">${e.nomi}</span>
+      </div>`).join('');
+
+    strip.classList.add('visible');
+  }
+
+  function openRelated(filename) {
+    const idx = lbFiltered.findIndex(e => e.filename === filename);
+    if (idx === -1) return;
+    if (window.innerWidth <= 600) {
+      lbIndex = idx; showSheetEntry();
+    } else {
+      lbIndex = idx; showLbEntry();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   // ── Slideshow ─────────────────────────────────────────
   function startSlideshow() {
     const filtered = getFiltered();
     if (!filtered.length) return;
-    lbFiltered = filtered;
-    lbIndex = 0;
+    lbFiltered = filtered; lbIndex = 0;
     showLbEntry();
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1020,60 +1417,37 @@
   }
 
   function toggleSlideshow() {
-    if (slideshowActive) {
-      stopSlideshow();
-    } else {
-      slideshowActive = true;
-      updateSlideshowBtn();
-      startSlideshowTimer();
-    }
+    if (slideshowActive) stopSlideshow();
+    else { slideshowActive = true; updateSlideshowBtn(); startSlideshowTimer(); }
   }
 
   function startSlideshowTimer() {
-    const bar = document.getElementById('slideshowBar');
     const progress = document.getElementById('slideshowProgress');
-    bar.classList.add('visible');
-    progress.style.transition = 'none';
-    progress.style.width = '0%';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        progress.style.transition = `width ${SLIDESHOW_INTERVAL}ms linear`;
-        progress.style.width = '100%';
-      });
-    });
+    document.getElementById('slideshowBar').classList.add('visible');
+    progress.style.transition = 'none'; progress.style.width = '0%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      progress.style.transition = `width ${SLIDESHOW_INTERVAL}ms linear`;
+      progress.style.width = '100%';
+    }));
     slideshowTimer = setTimeout(() => {
-      if (lbIndex < lbFiltered.length - 1) {
-        lbIndex++;
-        showLbEntry();
-        startSlideshowTimer();
-      } else {
-        stopSlideshow();
-      }
+      if (lbIndex < lbFiltered.length - 1) { lbIndex++; showLbEntry(); startSlideshowTimer(); }
+      else stopSlideshow();
     }, SLIDESHOW_INTERVAL);
   }
 
-  function resetSlideshowTimer() {
-    clearTimeout(slideshowTimer);
-    startSlideshowTimer();
-  }
+  function resetSlideshowTimer() { clearTimeout(slideshowTimer); startSlideshowTimer(); }
 
   function stopSlideshow() {
-    clearTimeout(slideshowTimer);
-    slideshowTimer = null;
-    slideshowActive = false;
+    clearTimeout(slideshowTimer); slideshowTimer = null; slideshowActive = false;
     updateSlideshowBtn();
-    const bar = document.getElementById('slideshowBar');
-    bar.classList.remove('visible');
+    document.getElementById('slideshowBar').classList.remove('visible');
     document.getElementById('slideshowProgress').style.width = '0%';
   }
 
   function updateSlideshowBtn() {
     const btn = document.getElementById('lbSlideshowBtn');
-    if (slideshowActive) {
-      btn.textContent = 'Stop slideshow'; btn.classList.add('slideshow-active');
-    } else {
-      btn.textContent = 'Slideshow'; btn.classList.remove('slideshow-active');
-    }
+    btn.textContent = slideshowActive ? 'Stop slideshow' : 'Slideshow';
+    btn.classList.toggle('slideshow-active', slideshowActive);
   }
 
   // ── Toast ─────────────────────────────────────────────
@@ -1086,12 +1460,16 @@
   // ── Keyboard ──────────────────────────────────────────
   document.addEventListener('keydown', e => {
     const sheetOpen = document.getElementById('bottomSheet').classList.contains('open');
-    const lbOpen = document.getElementById('lightbox').classList.contains('open');
-    if (e.key === 'Escape') { if (lbOpen) closeLightbox(); if (sheetOpen) closeSheet(); }
-    if (!lbOpen) return;
-    if (e.key === 'ArrowLeft') lbNav(-1, null);
-    if (e.key === 'ArrowRight') lbNav(1, null);
-    if (e.key === ' ') { e.preventDefault(); toggleSlideshow(); }
+    const lbOpen    = document.getElementById('lightbox').classList.contains('open');
+    if (e.key === 'Escape')      { if (lbOpen) closeLightbox(); if (sheetOpen) closeSheet(); }
+    if (!lbOpen && !sheetOpen) return;
+    if (e.key === 'ArrowLeft')   lbOpen ? lbNav(-1, null)  : sheetNav(-1);
+    if (e.key === 'ArrowRight')  lbOpen ? lbNav(1, null)   : sheetNav(1);
+    if (e.key === ' ')           { e.preventDefault(); if (lbOpen) toggleSlideshow(); }
+    if (e.key === 'f' || e.key === 'F') {
+      const entry = lbFiltered[lbIndex];
+      if (entry) toggleFav(entry.filename, null);
+    }
   });
 
   // Swipe down to close bottom sheet
@@ -1100,8 +1478,7 @@
     const sheet = document.getElementById('bottomSheet');
     sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
     sheet.addEventListener('touchend', e => {
-      const dy = e.changedTouches[0].clientY - startY;
-      if (dy > 60) closeSheet();
+      if (e.changedTouches[0].clientY - startY > 60) closeSheet();
     }, { passive: true });
   })();
 

@@ -103,13 +103,20 @@ For each image in your `images/` folder:
 
 - **Filter by Nomi** — pill tabs with image counts
 - **Filter by style** — Realistic / Anime / Mix filter row, only shown when style data exists in the CSV
+- **Filter by favourites** — toolbar button to show only favourited images
+- **Sort order** — Newest first, Oldest first, Nomi A→Z, Nomi Z→A
 - **Search prompts** — full-text search across all prompts
-- **Lightbox** — click any image for full-size view
+- **Infinite scroll** — loads 15 images at a time, auto-loads as you scroll
+- **Favourites** — heart button on cards, lightbox, and bottom sheet; press `F` on desktop; syncs via CSV in remote mode
+- **Related images** — strip of up to 6 keyword-matched images shown when viewing any image
+- **Lightbox** — click any image for full-size view with scroll-to-zoom and double-click to reset
+- **Pinch to zoom** — two-finger pinch in the lightbox on mobile
 - **Slideshow** — auto-advances every 5 seconds with progress bar
 - **NSFW covers** — blurred thumbnails with click-to-reveal; always shown unblurred in lightbox
 - **Copy prompt** — one click from gallery or lightbox
-- **Keyboard navigation** — `←` `→` to navigate, `Esc` to close, `Space` to pause/resume slideshow
+- **Keyboard navigation** — `←` `→` to navigate, `Esc` to close, `Space` slideshow, `F` favourite
 - **Dark mode** — follows your system setting automatically
+- **Mobile bottom sheet** — tapping an image on mobile slides up a sheet with full prompt and controls
 - **Mobile layout** — responsive 2-column grid on phones
 
 ---
@@ -150,9 +157,9 @@ Nomi Downloader is a browser extension that fills the acquisition gap this toolk
 The `prompts.csv` file uses four columns:
 
 ```
-filename, nomi_name, prompt, nsfw, style
-aurora_001.png, Aurora, "silver hair, cinematic portrait, soft morning light", false, Realistic
-aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true, Anime
+filename, nomi_name, prompt, nsfw, style, favourite
+aurora_001.png, Aurora, "silver hair, cinematic portrait, soft morning light", false, Realistic, false
+aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true, Anime, true
 ```
 
 | Column | Required | Notes |
@@ -162,6 +169,7 @@ aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true, A
 | `prompt` | Yes | Wrap in quotes if the prompt contains commas |
 | `nsfw` | No | `true` or `false` — defaults to `false` if omitted |
 | `style` | No | `Realistic`, `Anime`, or `Mix` — leave blank if not set |
+| `favourite` | No | `true` or `false` — defaults to `false` if omitted |
 
 You can edit this file in Numbers, Excel, or any text editor. Always save as `.csv`.
 
@@ -276,7 +284,7 @@ As of early 2026, the Nomi.ai API does not expose an endpoint for retrieving gen
 
 See [CHANGELOG.md](CHANGELOG.md) for full release notes.
 
-Current version: **v1.3.1**
+Current version: **v1.4.0**
 
 ---
 

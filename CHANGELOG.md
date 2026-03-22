@@ -9,6 +9,52 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [v1.4.0] — 2026-03-22
+
+### New features
+- `gallery.html` and `gallery-local.html` — major gallery improvements
+
+  **Sort order**
+  - Dropdown in the toolbar: Newest first, Oldest first, Nomi A→Z, Nomi Z→A
+  - Sort preference persisted in `localStorage` between sessions
+
+  **Infinite scroll**
+  - Gallery loads 15 images at a time, auto-loading the next batch as you scroll toward the bottom
+  - Small spinner shown while loading each batch
+  - Replaces loading the full image set at once — significantly improves performance on large archives
+
+  **Favourites**
+  - Heart button on every card (visible on hover, always visible when active)
+  - Also available in the desktop lightbox and mobile bottom sheet
+  - Press `F` on desktop to toggle favourite on the currently open image
+  - Favourites filter button in the toolbar — click to show only favourited images
+  - `gallery.html` (remote mode): writes `favourite` as a new 6th CSV column via the Worker, syncing across devices
+  - `gallery-local.html`: stored in `localStorage` per device
+
+  **Related images**
+  - When an image is open (lightbox or bottom sheet), a strip appears at the bottom of the gallery showing up to 6 images with shared prompt keywords
+  - Click any related image to jump to it
+  - Strip hides automatically when the lightbox or sheet is closed
+
+  **Pinch to zoom**
+  - Desktop lightbox: scroll wheel to zoom in/out, double-click to reset
+  - Mobile lightbox: two-finger pinch to zoom
+  - Zoom resets automatically when navigating to the next image
+
+  **Transition animations**
+  - Cards fade in with a stagger effect on initial load and when new batches load
+  - Gallery grid fades out and back in smoothly when switching Nomi, style, or sort order
+
+### CSV format update
+A new optional `favourite` column (6th) has been added. Fully backwards compatible — old CSVs without this column continue to work.
+
+```
+filename, nomi_name, prompt, nsfw, style, favourite
+aurora_001.png, Aurora, "your prompt here", false, Realistic, true
+```
+
+---
+
 ## [v1.3.1] — 2026-03-22
 
 ### Improvements
