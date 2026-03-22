@@ -298,33 +298,46 @@
     text-transform: uppercase; z-index: 3; pointer-events: none;
   }
 
-  .card-body { padding: 12px 14px 14px; }
+  /* ── Prompt overlay on card ── */
+  .prompt-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+    padding: 28px 12px 12px;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    pointer-events: none;
+  }
 
-  .prompt-text {
-    font-size: 13px; color: var(--text2); line-height: 1.6;
-    margin-bottom: 12px;
+  .card:hover .prompt-overlay { opacity: 1; transform: translateY(0); }
+
+  .prompt-overlay-text {
+    font-size: 12px; color: rgba(255,255,255,0.92); line-height: 1.5;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
 
-  .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .prompt-overlay-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 8px; pointer-events: all;
+  }
 
   .filename {
-    font-size: 11px; color: var(--text3); font-style: italic;
+    font-size: 10px; color: rgba(255,255,255,0.45); font-style: italic;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;
   }
 
   .copy-btn {
-    display: flex; align-items: center; gap: 5px;
-    padding: 5px 11px; font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 10px; font-size: 11px;
     font-family: 'DM Sans', sans-serif;
-    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
-    background: transparent; color: var(--text2);
+    border: 0.5px solid rgba(255,255,255,0.3); border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
     cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   }
 
-  .copy-btn:hover { background: var(--surface2); color: var(--text); }
-  .copy-btn.copied { color: var(--success); border-color: var(--success); }
-  .copy-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .copy-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+  .copy-btn.copied { color: #6ee7a8; border-color: rgba(110,231,168,0.5); }
+  .copy-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
 
   /* ── Sentinel (infinite scroll trigger) ── */
   .scroll-sentinel {
@@ -348,28 +361,63 @@
 
   .empty-state p { font-size: 14px; margin-bottom: 8px; }
 
-  /* ── Related images strip ── */
-  .related-strip {
-    display: none;
-    margin-top: 2rem; padding-top: 1.5rem;
-    border-top: 0.5px solid var(--border);
-  }
-
-  .related-strip.visible { display: block; }
-
+  /* ── Related images ── */
   .related-title {
     font-size: 11px; font-weight: 500; text-transform: uppercase;
-    letter-spacing: 0.09em; color: var(--text3); margin-bottom: 1rem;
+    letter-spacing: 0.09em; color: var(--text3); margin-bottom: 0.75rem;
   }
 
   .related-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
   }
 
-  @media (max-width: 600px) {
-    .related-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  /* Inside lightbox — horizontal scroll row */
+  .lightbox-related {
+    display: none;
+    max-width: min(880px, 90vw);
+    margin-top: 1rem; padding-top: 1rem;
+    border-top: 0.5px solid rgba(255,255,255,0.12);
+    cursor: default;
+  }
+
+  .lightbox-related.visible { display: block; }
+
+  .lightbox-related .related-title { color: rgba(255,255,255,0.35); }
+
+  .lightbox-related .related-grid {
+    display: flex; gap: 8px; overflow-x: auto;
+    grid-template-columns: none;
+    padding-bottom: 4px;
+  }
+
+  .lightbox-related .related-card {
+    flex: 0 0 100px; width: 100px; height: 100px;
+  }
+
+  .lightbox-related .related-card img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  /* Inside bottom sheet */
+  .sheet-related {
+    padding-top: 12px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .sheet-related .related-grid {
+    display: flex; gap: 8px; overflow-x: auto;
+    grid-template-columns: none;
+    padding-bottom: 4px;
+  }
+
+  .sheet-related .related-card {
+    flex: 0 0 90px; width: 90px; height: 90px;
+  }
+
+  .sheet-related .related-card img {
+    width: 100%; height: 100%; object-fit: cover;
   }
 
   .related-card {
@@ -669,10 +717,8 @@
     <div class="stats-bar" id="statsBar"></div>
     <div class="toolbar-actions">
       <select class="sort-select" id="sortSelect" onchange="onSortChange()">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="nomi_az">Nomi A→Z</option>
-        <option value="nomi_za">Nomi Z→A</option>
+        <option value="newest">Last added</option>
+        <option value="oldest">First added</option>
       </select>
       <button class="toolbar-btn" id="favFilterBtn" onclick="toggleFavFilter()">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -691,10 +737,6 @@
 
   <div class="gallery" id="gallery"></div>
   <div class="load-more-spinner" id="loadMoreSpinner"><div class="spinner"></div></div>
-  <div class="related-strip" id="relatedStrip">
-    <div class="related-title" id="relatedTitle">Related images</div>
-    <div class="related-grid" id="relatedGrid"></div>
-  </div>
 </div>
 
 <!-- Lightbox -->
@@ -723,6 +765,10 @@
       </button>
       <button class="lightbox-btn" id="lbSlideshowBtn" onclick="toggleSlideshow()">Slideshow</button>
     </div>
+  </div>
+  <div class="lightbox-related" id="relatedStrip" onclick="event.stopPropagation()">
+    <div class="related-title" id="relatedTitle">Related images</div>
+    <div class="related-grid" id="relatedGrid"></div>
   </div>
 </div>
 <div class="zoom-hint" id="zoomHint">Scroll to zoom · Double-click to reset</div>
@@ -758,6 +804,10 @@
       <button class="sheet-fav-btn" id="sheetFavBtn" onclick="sheetToggleFav()">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/></svg>
       </button>
+    </div>
+    <div class="sheet-related" id="sheetRelated" style="display:none;">
+      <div class="related-title" id="sheetRelatedTitle"></div>
+      <div class="related-grid" id="sheetRelatedGrid"></div>
     </div>
   </div>
 </div>
@@ -954,12 +1004,8 @@
       (!showFavsOnly || favourites[e.filename])          &&
       (!q || e.prompt.toLowerCase().includes(q) || e.nomi.toLowerCase().includes(q) || e.filename.toLowerCase().includes(q))
     );
-    switch (activeSort) {
-      case 'oldest':  list = [...list].reverse(); break;
-      case 'nomi_az': list = [...list].sort((a,b) => a.nomi.localeCompare(b.nomi)); break;
-      case 'nomi_za': list = [...list].sort((a,b) => b.nomi.localeCompare(a.nomi)); break;
-      // 'newest' is default CSV order (newest last → show reversed)
-    }
+    if (activeSort === 'oldest') list = [...list].reverse();
+    // 'newest' (Last added) is default — CSV order is newest-last so no change needed
     return list;
   }
 
@@ -1027,18 +1073,18 @@
             <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z"/>
           </svg>
         </button>
-      </div>
-      <div class="card-body">
-        <p class="prompt-text">${e.prompt}</p>
-        <div class="card-footer">
-          <span class="filename">${e.filename}</span>
-          <button class="copy-btn" data-prompt="${e.prompt.replace(/"/g,'&quot;')}" onclick="copyPrompt(this)">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <rect x="5" y="5" width="9" height="9" rx="1.5"/>
-              <path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/>
-            </svg>
-            Copy prompt
-          </button>
+        <div class="prompt-overlay" onclick="event.stopPropagation()">
+          <p class="prompt-overlay-text">${e.prompt}</p>
+          <div class="prompt-overlay-actions">
+            <span class="filename">${e.filename}</span>
+            <button class="copy-btn" data-prompt="${e.prompt.replace(/"/g,'&quot;')}" onclick="copyPrompt(this)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <rect x="5" y="5" width="9" height="9" rx="1.5"/>
+                <path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/>
+              </svg>
+              Copy
+            </button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1242,6 +1288,8 @@
     document.body.style.overflow = '';
     stopSlideshow();
     document.getElementById('relatedStrip').classList.remove('visible');
+    const sr = document.getElementById('sheetRelated');
+    if (sr) sr.style.display = 'none';
   }
 
   function lbCopy() {
@@ -1342,6 +1390,8 @@
     document.getElementById('sheetBackdrop').classList.remove('open');
     document.body.style.overflow = '';
     document.getElementById('relatedStrip').classList.remove('visible');
+    const sr = document.getElementById('sheetRelated');
+    if (sr) sr.style.display = 'none';
   }
 
   function sheetCopy() {

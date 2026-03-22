@@ -9,6 +9,24 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [v1.4.1] — 2026-03-22
+
+### Improvements
+- `gallery.html`, `gallery-toolkit.html`, `gallery-local.html` — gallery card redesign
+  - Removed prompt text and filename from below each card — grid is now a clean image mosaic
+  - Prompt appears as a gradient overlay at the bottom of the image on hover (desktop), fading in smoothly with the filename and a compact Copy button
+  - Cards are fully square with no wasted whitespace
+  - Mobile behaviour unchanged — tapping opens the bottom sheet with full prompt details
+
+- Sort order simplified
+  - Renamed "Newest first / Oldest first" to **Last added / First added** to accurately reflect CSV order rather than implying date metadata
+  - Removed Nomi A→Z / Z→A sort options — the Nomi filter tabs already serve this purpose
+
+- Related images fix
+  - Related strip now appears **inside the lightbox** (desktop) and **inside the bottom sheet** (mobile) as a horizontal scroll row, rather than below the gallery where it was hidden behind the lightbox overlay
+
+---
+
 ## [v1.4.0] — 2026-03-22
 
 ### New features
