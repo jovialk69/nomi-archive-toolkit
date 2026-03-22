@@ -434,6 +434,64 @@
     color: rgba(220,80,80,0.85); background: rgba(220,80,80,0.08);
     flex-shrink: 0;
   }
+
+  /* Style badge on entry cards */
+  .entry-style-badge {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 7px;
+    border-radius: 999px; border: 0.5px solid var(--border2);
+    color: var(--text2); background: var(--surface3);
+    flex-shrink: 0;
+  }
+
+  /* Inline prompt edit */
+  .entry-edit-area {
+    display: none; flex-direction: column; gap: 6px; margin-top: 6px;
+  }
+
+  .entry-edit-area.visible { display: flex; }
+
+  .entry-edit-area textarea {
+    width: 100%; padding: 8px 10px; font-size: 13px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); outline: none;
+    resize: vertical; min-height: 72px; transition: border-color 0.15s;
+  }
+
+  .entry-edit-area textarea:focus { border-color: var(--border3); }
+
+  .entry-edit-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+  .entry-edit-row select {
+    padding: 4px 8px; font-size: 12px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--surface2); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .entry-edit-row select:focus { border-color: var(--border3); }
+
+  .edit-save-btn {
+    padding: 4px 12px; font-size: 12px; font-weight: 500;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--accent); border: none;
+    border-radius: var(--radius-sm); color: #0e0e0c;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+
+  .edit-save-btn:hover { opacity: 0.85; }
+
+  .edit-cancel-btn {
+    padding: 4px 10px; font-size: 12px;
+    font-family: 'Instrument Sans', sans-serif;
+    background: transparent; border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+  }
+
+  .edit-cancel-btn:hover { background: var(--surface2); color: var(--text); }
 </style>
 </head>
 <body>
@@ -476,6 +534,15 @@
       <div class="field" style="max-width:130px;">
         <label>Image # (optional)</label>
         <input type="number" id="imgNumber" placeholder="auto" min="1" oninput="onFormChange()">
+      </div>
+      <div class="field" style="max-width:130px;">
+        <label>Style</label>
+        <select id="styleSelect">
+          <option value="">— select —</option>
+          <option value="Realistic">Realistic</option>
+          <option value="Anime">Anime</option>
+          <option value="Mix">Mix</option>
+        </select>
       </div>
     </div>
 
@@ -668,16 +735,18 @@
     const nomi = document.getElementById('nomiSelect').value;
     const prompt = document.getElementById('promptInput').value.trim();
     const numInput = document.getElementById('imgNumber').value;
+    const style = document.getElementById('styleSelect').value;
     if (!nomi) { showToast('Please select a Nomi'); return; }
     if (!prompt) { showToast('Please enter a prompt'); return; }
     const num = numInput ? parseInt(numInput) : getNextNumber(nomi);
     const ext = currentOriginalName ? getExt(currentOriginalName) : 'png';
     const filename = buildFilename(nomi, num, ext);
-    const entry = { id: Date.now(), nomi, filename, prompt, nsfw: nsfwFlag, date: new Date().toISOString(), thumb: null };
+    const entry = { id: Date.now(), nomi, filename, prompt, style, nsfw: nsfwFlag, date: new Date().toISOString(), thumb: null };
     entries.unshift(entry);
     if (currentImageData) imageDataMap[entry.id] = currentImageData;
     document.getElementById('promptInput').value = '';
     document.getElementById('imgNumber').value = '';
+    document.getElementById('styleSelect').value = '';
     // Reset NSFW toggle
     nsfwFlag = false;
     document.getElementById('nsfwToggleRow').classList.remove('active');
@@ -745,6 +814,35 @@
     showToast(entry.nsfw ? 'Marked as NSFW' : 'NSFW removed', 'success');
   }
 
+  function startEdit(id) {
+    document.getElementById(`prompt-text-${id}`).style.display = 'none';
+    document.getElementById(`edit-area-${id}`).classList.add('visible');
+    document.getElementById(`edit-btn-${id}`).style.display = 'none';
+    document.getElementById(`edit-textarea-${id}`).focus();
+  }
+
+  function cancelEdit(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    document.getElementById(`edit-textarea-${id}`).value = entry.prompt;
+    document.getElementById(`edit-style-${id}`).value = entry.style || '';
+    document.getElementById(`prompt-text-${id}`).style.display = '';
+    document.getElementById(`edit-area-${id}`).classList.remove('visible');
+    document.getElementById(`edit-btn-${id}`).style.display = '';
+  }
+
+  function saveEdit(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    const newPrompt = document.getElementById(`edit-textarea-${id}`).value.trim();
+    const newStyle = document.getElementById(`edit-style-${id}`).value;
+    if (!newPrompt) { showToast('Prompt cannot be empty'); return; }
+    entry.prompt = newPrompt;
+    entry.style = newStyle;
+    save(); renderEntries();
+    showToast('Entry updated', 'success');
+  }
+
   function copyPrompt(id, btn) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
@@ -782,13 +880,28 @@
           <div class="entry-meta">
             <span class="entry-nomi">${e.nomi}</span>
             <span class="entry-filename">${e.filename}</span>
+            ${e.style ? `<span class="entry-style-badge">${e.style}</span>` : ''}
             ${e.nsfw ? '<span class="entry-nsfw-badge">NSFW</span>' : ''}
             <span class="entry-date">${dateStr}</span>
           </div>
-          <div class="entry-prompt">${e.prompt}</div>
+          <div class="entry-prompt" id="prompt-text-${e.id}">${e.prompt}</div>
+          <div class="entry-edit-area" id="edit-area-${e.id}">
+            <textarea id="edit-textarea-${e.id}">${e.prompt}</textarea>
+            <div class="entry-edit-row">
+              <select id="edit-style-${e.id}">
+                <option value="">— style —</option>
+                <option value="Realistic"${e.style==='Realistic'?' selected':''}>Realistic</option>
+                <option value="Anime"${e.style==='Anime'?' selected':''}>Anime</option>
+                <option value="Mix"${e.style==='Mix'?' selected':''}>Mix</option>
+              </select>
+              <button class="edit-save-btn" onclick="saveEdit(${e.id})">Save</button>
+              <button class="edit-cancel-btn" onclick="cancelEdit(${e.id})">Cancel</button>
+            </div>
+          </div>
         </div>
         <div class="entry-actions">
           <button class="mini-btn" onclick="copyPrompt(${e.id},this)">Copy</button>
+          <button class="mini-btn" id="edit-btn-${e.id}" onclick="startEdit(${e.id})">Edit</button>
           <button class="mini-btn ${e.nsfw ? 'nsfw-on' : ''}" onclick="toggleEntryNsfw(${e.id})" title="${e.nsfw ? 'Remove NSFW flag' : 'Mark as NSFW'}">${e.nsfw ? 'NSFW ✓' : 'NSFW'}</button>
           <button class="mini-btn del" onclick="deleteEntry(${e.id})">Delete</button>
         </div>
@@ -798,10 +911,10 @@
 
   function exportCSV() {
     if (!entries.length) { showToast('Nothing to export yet'); return; }
-    const rows = ['filename,nomi_name,prompt,nsfw'];
+    const rows = ['filename,nomi_name,prompt,nsfw,style'];
     [...entries].reverse().forEach(e => {
       const p = e.prompt.includes(',') ? `"${e.prompt.replace(/"/g,'""')}"` : e.prompt;
-      rows.push(`${e.filename},${e.nomi},${p},${e.nsfw ? 'true' : 'false'}`);
+      rows.push(`${e.filename},${e.nomi},${p},${e.nsfw ? 'true' : 'false'},${e.style || ''}`);
     });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
@@ -821,7 +934,7 @@
         const filename = line.slice(0,f).trim();
         const nomi = line.slice(f+1,s).trim();
         let rest = line.slice(s+1).trim();
-        let prompt = rest, nsfw = false;
+        let prompt = rest, nsfw = false, style = '';
 
         // Normalise triple quotes (export artefact) to single quote
         while (rest.startsWith('""')) rest = rest.slice(1);
@@ -831,24 +944,34 @@
           if (cq !== -1) {
             prompt = rest.slice(1, cq);
             const after = rest.slice(cq+1).trim();
-            if (after.startsWith(',')) nsfw = after.slice(1).trim().toLowerCase() === 'true';
+            if (after.startsWith(',')) {
+              const afterFields = after.slice(1).split(',');
+              nsfw = afterFields[0].trim().toLowerCase() === 'true';
+              style = afterFields[1] ? afterFields[1].trim() : '';
+            }
           } else {
             prompt = rest.slice(1); // unclosed quote — take the rest
           }
         } else {
-          const lc = rest.lastIndexOf(',');
-          if (lc !== -1) {
-            const maybeNsfw = rest.slice(lc+1).trim().toLowerCase();
-            if (maybeNsfw === 'true' || maybeNsfw === 'false') {
-              prompt = rest.slice(0, lc).trim();
-              nsfw = maybeNsfw === 'true';
-            }
+          // Find nsfw field — it's the second-to-last or last comma-separated value
+          const parts = rest.split(',');
+          const nsfwCandidate = parts[parts.length - 1].trim().toLowerCase();
+          const styleCandidate = parts[parts.length - 1].trim();
+          const nsfwPrev = parts[parts.length - 2] ? parts[parts.length - 2].trim().toLowerCase() : '';
+          if (nsfwCandidate === 'realistic' || nsfwCandidate === 'anime' || nsfwCandidate === 'mix' || nsfwCandidate === '') {
+            // Last field is style, second-to-last is nsfw
+            style = parts[parts.length - 1].trim();
+            nsfw = nsfwPrev === 'true';
+            prompt = parts.slice(0, parts.length - 2).join(',').trim();
+          } else if (nsfwCandidate === 'true' || nsfwCandidate === 'false') {
+            nsfw = nsfwCandidate === 'true';
+            prompt = parts.slice(0, parts.length - 1).join(',').trim();
           }
         }
 
         if (!nomis.includes(nomi)) nomis.push(nomi);
         if (entries.find(e => e.filename===filename)) continue;
-        entries.push({id:Date.now()+i,nomi,filename,prompt,nsfw,date:new Date().toISOString(),thumb:null});
+        entries.push({id:Date.now()+i,nomi,filename,prompt,style,nsfw,date:new Date().toISOString(),thumb:null});
         added++;
       }
       save(); renderSidebar(); renderEntries(); updateTotalCount();

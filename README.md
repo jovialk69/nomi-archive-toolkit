@@ -20,6 +20,8 @@ See the gallery in action with sample images and prompts — lightbox, NSFW cove
 
 Nomi.ai doesn't currently provide a way to export your generated images or retrieve the prompts that created them via its API. This toolkit fills that gap — giving you a fast, private, offline-first way to archive your Nomi images and the prompts behind them, so you can recreate them anytime even if you delete a Nomi.
 
+For bulk-downloading images and chat histories directly from Nomi.ai, see [Companion tools](#companion-tools) below.
+
 ---
 
 ## What's included
@@ -53,21 +55,47 @@ Nomi Archive/
 1. Open `logger.html` in Safari or Chrome
 2. In the left sidebar under **Add Nomi**, type each Nomi's name and press `+`
 
-### Step 3 — Log an image
+### Step 3 — Get your images
 
-Each time you download an image from Nomi.ai:
+**Option A — one at a time (no extra tools needed)**
+
+Download images from Nomi.ai as you go and drop them into your `images/` folder.
+
+**Option B — bulk download with Nomi Downloader (recommended)**
+
+If you have a backlog of images to archive, [Nomi Downloader](https://chromewebstore.google.com/detail/nomi-downloader/dglkpknkpjcfdbbmgidognlnanlocfem) lets you download an entire album as a zip file in one click. Extract the zip into your `images/` folder, then use `logger.html` to log each image and its prompt. The logger will show a rename hint for any files with messy Nomi.ai filenames.
+
+See [Companion tools](#companion-tools) for more details.
+
+### Step 4 — Log an image
+
+For each image in your `images/` folder:
 
 1. Select the **Nomi name** from the dropdown
-2. Click the image picker and select the downloaded image
+2. Click the image picker and select the image
 3. If the filename is messy (e.g. `Aurora Selfie (3).png`), a **rename hint** appears — hit **Copy name**, then rename it in Finder (select file → `Return` → paste → `Return`)
 4. Paste the **image prompt** from Nomi.ai
-5. Optionally toggle **Mark as NSFW** — this blurs the thumbnail in the gallery until clicked
-6. Click **Log entry →**
+5. Optionally select a **Style** — `Realistic`, `Anime`, or `Mix`
+6. Optionally toggle **Mark as NSFW** — this blurs the thumbnail in the gallery until clicked
+7. Click **Log entry →**
 
-### Step 4 — Export and browse
+### Step 5 — Export and browse
 
 1. In `logger.html`, click **↓ Export prompts.csv** → save it into your `Nomi Archive/` folder
 2. Open `gallery-local.html` → select all images (Cmd+A) + select `prompts.csv` → click **Load gallery**
+
+---
+
+## Logger features
+
+- **Style tagging** — tag each image as `Realistic`, `Anime`, or `Mix` when logging
+- **Inline editing** — edit any existing prompt directly in the log list; update style at the same time
+- **NSFW toggle** — mark and unmark entries as NSFW from the log list
+- **Copy prompt** — one click to copy any logged prompt to clipboard
+- **Rename hint** — auto-generates the correct filename and shows a copy button when the original is messy
+- **Import existing CSV** — loads a previous `prompts.csv` without duplicating entries; handles old 4-column files automatically
+- **Export CSV** — produces `prompts.csv` with all columns including `style` and `nsfw`
+- **Persistent storage** — all data saved in browser `localStorage` between sessions
 
 ---
 
@@ -85,14 +113,45 @@ Each time you download an image from Nomi.ai:
 
 ---
 
+## Companion tools
+
+### Nomi Downloader
+
+[**→ Nomi Downloader on Chrome Web Store**](https://chromewebstore.google.com/detail/nomi-downloader/dglkpknkpjcfdbbmgidognlnanlocfem)
+
+Also available for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/nomi-downloader/).
+
+Nomi Downloader is a browser extension that fills the acquisition gap this toolkit doesn't cover — getting your images and chat history off Nomi.ai quickly. It lets you download an entire album as a zip file and export full chat histories, all in a few clicks.
+
+**How it works alongside this toolkit:**
+
+| Nomi Downloader | Nomi Archive Toolkit |
+|---|---|
+| Bulk-downloads images from Nomi.ai | Organises, renames, and catalogues those images |
+| Exports raw chat history | Stores and browses image prompts specifically |
+| Gets your media off the platform fast | Displays, searches, and slideshows your archive |
+
+> **Important:** When exporting chat history, Nomi Downloader can surface prompts for selfies generated **within the chat** — but it does **not** capture prompts from Nomi.ai's **Create Art** feature. If you use Create Art, you'll need to copy those prompts manually into `logger.html` as usual.
+
+**Recommended workflow for a backlog of images:**
+
+1. Use Nomi Downloader to download your full album as a zip
+2. Extract the zip into your `Nomi Archive/images/` folder
+3. Open `logger.html` and log each image — the rename hint will guide you to clean up filenames
+4. Export `prompts.csv` and browse with `gallery-local.html`
+
+**A note on trust:** Nomi Downloader is a third-party extension not affiliated with this project. It has a small user base, so exercise normal caution when installing any browser extension. The developer has disclosed that no user data is collected or sold.
+
+---
+
 ## CSV format
 
 The `prompts.csv` file uses four columns:
 
 ```
-filename, nomi_name, prompt, nsfw
-aurora_001.png, Aurora, "silver hair, cinematic portrait, soft morning light", false
-aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true
+filename, nomi_name, prompt, nsfw, style
+aurora_001.png, Aurora, "silver hair, cinematic portrait, soft morning light", false, Realistic
+aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true, Anime
 ```
 
 | Column | Required | Notes |
@@ -101,6 +160,7 @@ aurora_002.png, Aurora, "dark forest, bioluminescent glow, fantasy art", true
 | `nomi_name` | Yes | Drives the filter tabs in the gallery |
 | `prompt` | Yes | Wrap in quotes if the prompt contains commas |
 | `nsfw` | No | `true` or `false` — defaults to `false` if omitted |
+| `style` | No | `Realistic`, `Anime`, or `Mix` — leave blank if not set |
 
 You can edit this file in Numbers, Excel, or any text editor. Always save as `.csv`.
 
@@ -215,7 +275,7 @@ As of early 2026, the Nomi.ai API does not expose an endpoint for retrieving gen
 
 See [CHANGELOG.md](CHANGELOG.md) for full release notes.
 
-Current version: **v1.0.0**
+Current version: **v1.2.0**
 
 ---
 

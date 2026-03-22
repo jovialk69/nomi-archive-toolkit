@@ -9,6 +9,37 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [v1.2.0] — 2026-03-22
+
+### New features
+- `logger.html` — **inline editing** on existing entries
+  - **Edit prompt** — click Edit on any entry card to reveal an inline textarea pre-filled with the existing prompt; save or cancel without leaving the page
+  - **Edit style** — the inline edit area also exposes the Style dropdown, so style can be set or changed on any existing entry
+  - Both prompt and style are saved together in a single Save action; empty prompts are blocked
+  - Importing an old 4-column `prompts.csv` (without `style`) works without any manual changes — entries default to blank style and can be updated via inline edit
+
+---
+
+## [v1.1.0] — 2026-03-22
+
+### New features
+- `logger.html` — added **Style** field to the log form
+  - Dropdown options: `Realistic`, `Anime`, `Mix` (optional — leave blank if not set)
+  - Style tag displayed as a badge on each entry card in the log list
+  - Style value stored and reset correctly after each log entry
+  - Export includes style as a new 5th CSV column (`style`)
+  - Import parser handles both old 4-column CSVs and new 5-column CSVs — fully backwards compatible
+
+- `README.md` — added **Companion tools** section documenting [Nomi Downloader](https://chromewebstore.google.com/detail/nomi-downloader/dglkpknkpjcfdbbmgidognlnanlocfem) browser extension, including recommended bulk-download workflow and note on Create Art prompt limitation
+
+### CSV Format
+```
+filename, nomi_name, prompt, nsfw, style
+aurora_001.png, Aurora, "your prompt here", false, Realistic
+```
+
+---
+
 ## [v1.0.0] — 2025-03-16
 
 Initial public release.
