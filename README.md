@@ -276,7 +276,7 @@ As of early 2026, the Nomi.ai API does not expose an endpoint for retrieving gen
 
 See [CHANGELOG.md](CHANGELOG.md) for full release notes.
 
-Current version: **v1.3.0**
+Current version: **v1.3.1**
 
 ---
 

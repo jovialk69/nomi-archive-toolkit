@@ -516,7 +516,7 @@
   <div class="export-block">
     <div class="sidebar-label">Export / Import</div>
     <button class="export-btn" onclick="exportCSV()">↓ Export prompts.csv</button>
-    <label class="import-btn-sm">↑ Import CSV + images
+    <label class="import-btn-sm">↑ Load CSV (replaces all)
       <input type="file" accept=".csv" style="display:none" onchange="importCSV(event)">
     </label>
     <label class="import-btn-sm" style="color:var(--text3);">↑ Load images only
@@ -938,6 +938,11 @@
 
     // Process the CSV text, then optionally match images
     const processCSV = (text, imgFiles) => {
+      // Clear existing data — import replaces everything with the CSV contents
+      entries = [];
+      nomis = [];
+      imageDataMap = {};
+
       // Build a filename → objectURL map from selected images
       if (imgFiles) {
         for (const f of imgFiles) imageDataMap[f.name] = URL.createObjectURL(f);
@@ -984,17 +989,16 @@
         }
 
         if (!nomis.includes(nomi)) nomis.push(nomi);
-        if (entries.find(e => e.filename===filename)) continue;
         const id = Date.now() + i;
         entries.push({id, nomi, filename, prompt, style, nsfw, date: new Date().toISOString(), thumb: null});
         added++;
       }
 
-      // Match loaded images to existing entries by filename
+      // Match loaded images to entries by filename
       matchImagesToEntries();
       save(); renderSidebar(); renderEntries(); updateTotalCount();
       const imgCount = imgFiles ? imgFiles.length : 0;
-      showToast(`Imported ${added} entr${added!==1?'ies':'y'}${imgCount ? ` · ${imgCount} image${imgCount!==1?'s':''} loaded` : ''}`, 'success');
+      showToast(`Loaded ${added} entr${added!==1?'ies':'y'}${imgCount ? ` · ${imgCount} image${imgCount!==1?'s':''} loaded` : ''}`, 'success');
       document.body.removeChild(imgPicker);
     };
 

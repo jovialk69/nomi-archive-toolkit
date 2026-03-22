@@ -9,6 +9,18 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ---
 
+## [v1.3.1] — 2026-03-22
+
+### Improvements
+- `gallery.html` and `gallery-local.html` — **mobile bottom sheet**
+  - Tapping an image on mobile (≤600px) opens a bottom sheet instead of the desktop lightbox
+  - Sheet slides up from the bottom with the full image, prev/next navigation, full prompt (scrollable, no truncation), Nomi name, style badge, NSFW badge, filename, and a full-width Copy prompt button
+  - Dismiss by tapping the backdrop or swiping down
+  - Desktop lightbox behaviour unchanged
+  - Bottom sheet only rendered on mobile — hidden entirely on desktop via CSS
+
+---
+
 ## [v1.3.0] — 2026-03-22
 
 ### New features
